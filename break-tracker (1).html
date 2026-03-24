@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Staff Break Tracker — Deerkill Day Camp</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:      #0d1117;
+      --surface: #161b22;
+      --surface2:#1e2530;
+      --border:  #2a3441;
+      --accent:  #3fb950;
+      --accent2: #58a6ff;
+      --warn:    #f0883e;
+      --danger:  #f85149;
+      --text:    #e6edf3;
+      --muted:   #7d8590;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo { display: flex; align-items: center; gap: 10px; }
+    .logo h1    { font-size: 16px; font-weight: 600; }
+    .logo small { font-size: 11px; color: var(--muted); display: block; }
+
+    .camp-logo {
+      height: 44px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .clock-display {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      color: var(--muted);
+      text-align: right;
+    }
+    .clock-display .time { font-size: 20px; color: var(--text); font-weight: 500; }
+
+    .period-badge {
+      display: inline-block;
+      background: var(--accent2);
+      color: #0d1117;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 9px;
+      border-radius: 20px;
+      margin-top: 3px;
+      font-family: 'Sora', sans-serif;
+      letter-spacing: .3px;
+    }
+    .period-badge.off { background: var(--border); color: var(--muted); }
+
+    /* ── MAIN ── */
+    main { max-width: 520px; margin: 0 auto; padding: 40px 24px; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 32px;
+    }
+
+    .card h2        { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .card .subtitle { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+
+    /* ── PERIOD ROW ── */
+    .period-row {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 13px 16px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .period-dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: var(--accent2);
+      flex-shrink: 0;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    .period-row .plabel { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+    .period-row .pvalue { font-size: 15px; font-weight: 600; font-family: 'DM Mono', monospace; }
+    .period-row .ptime  { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+
+    /* ── STREAK BANNER ── */
+    .streak-banner {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      line-height: 1.5;
+      animation: fadeSlideIn .3s ease;
+    }
+
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .streak-banner.visible { display: flex; }
+
+    .streak-banner.fire {
+      background: rgba(255, 183, 0, .10);
+      border: 1px solid rgba(255, 183, 0, .35);
+      color: #f5c400;
+    }
+
+    .streak-banner.nudge {
+      background: rgba(88, 166, 255, .10);
+      border: 1px solid rgba(88, 166, 255, .30);
+      color: var(--accent2);
+    }
+
+    .streak-banner.first {
+      background: rgba(63, 185, 80, .10);
+      border: 1px solid rgba(63, 185, 80, .30);
+      color: var(--accent);
+    }
+
+    .streak-icon { font-size: 22px; flex-shrink: 0; }
+    .streak-msg  { font-size: 13px; line-height: 1.5; }
+    .streak-msg strong { font-weight: 700; }
+
+    /* ── FORM ELEMENTS ── */
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    select {
+      width: 100%;
+      padding: 13px 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'Sora', sans-serif;
+      font-size: 15px;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%237d8590' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      cursor: pointer;
+      margin-bottom: 20px;
+      transition: border-color .15s;
+    }
+    select:focus    { outline: 2px solid var(--accent); border-color: transparent; }
+    select:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent);
+      color: #0d1117;
+      font-family: 'Sora', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all .2s;
+      letter-spacing: .2px;
+    }
+    .btn:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
+    .btn:active:not(:disabled){ transform: translateY(0); }
+    .btn:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+
+    /* ── ALERTS ── */
+    .alert {
+      border-radius: 8px;
+      padding: 13px 15px;
+      font-size: 13px;
+      line-height: 1.5;
+      margin-top: 16px;
+      display: none;
+    }
+    .alert.visible { display: block; }
+    .alert.success { background: rgba(63,185,80,.12);  border: 1px solid rgba(63,185,80,.35);  color: #56d364; }
+    .alert.error   { background: rgba(248,81,73,.12);  border: 1px solid rgba(248,81,73,.35);  color: var(--danger); }
+    .alert.warn    { background: rgba(240,136,62,.12); border: 1px solid rgba(240,136,62,.35); color: var(--warn); }
+
+    /* ── DUPLICATE CONFIRMATION ── */
+    .confirm-box {
+      background: rgba(240,136,62,.08);
+      border: 1px solid rgba(240,136,62,.4);
+      border-radius: 10px;
+      padding: 16px;
+      margin-top: 16px;
+      display: none;
+    }
+    .confirm-box.visible { display: block; }
+    .confirm-box p { font-size: 13px; color: var(--warn); line-height: 1.6; margin-bottom: 14px; }
+
+    .confirm-row { display: flex; gap: 10px; }
+
+    .btn-sm {
+      flex: 1;
+      padding: 10px;
+      font-family: 'Sora', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 7px;
+      cursor: pointer;
+      border: none;
+      transition: all .15s;
+    }
+    .btn-confirm { background: var(--warn); color: #0d1117; }
+    .btn-confirm:hover { filter: brightness(1.1); }
+    .btn-cancel  { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+    .btn-cancel:hover { color: var(--text); }
+
+    /* ── SPINNER ── */
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 11px;
+      color: var(--border);
+      font-family: 'DM Mono', monospace;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <img src="https://typewriter.imgix.net/u/d5ba13b1-8b81-4028-aa6f-21d6150324f1/fi/png/123/logo.png?auto=format,compress"
+         alt="Deerkill Day Camp" class="camp-logo">
+    <div>
+      <h1>Break Tracker</h1>
+      <small id="headerDate"></small>
+    </div>
+  </div>
+  <div class="clock-display">
+    <div class="time" id="clockTime"></div>
+    <div id="clockPeriodWrap"></div>
+  </div>
+</header>
+
+<main>
+  <div class="card">
+    <h2>Take Your Break ☕</h2>
+    <p class="subtitle">Select your name and log your break for today.</p>
+
+    <div class="period-row">
+      <div class="period-dot" id="periodDot"></div>
+      <div>
+        <div class="plabel">Current Period</div>
+        <div class="pvalue" id="currentPeriod">—</div>
+        <div class="ptime" id="currentPeriodTime"></div>
+      </div>
+    </div>
+
+    <!-- Streak banner — appears after name selection -->
+    <div class="streak-banner" id="streakBanner">
+      <span class="streak-icon" id="streakIcon"></span>
+      <span class="streak-msg"  id="streakMsg"></span>
+    </div>
+
+    <label for="staffSelect">Your Name</label>
+    <select id="staffSelect" onchange="onStaffSelect()" disabled>
+      <option value="">Loading staff list…</option>
+    </select>
+
+    <button class="btn" id="checkoutBtn" onclick="onCheckoutClick()" disabled>
+      Log My Break
+    </button>
+
+    <!-- Duplicate acknowledgment warning -->
+    <div class="confirm-box" id="confirmBox">
+      <p id="confirmMsg"></p>
+      <div class="confirm-row">
+        <button class="btn-sm btn-confirm" onclick="submitBreak(true)">Yes, Log Another</button>
+        <button class="btn-sm btn-cancel"  onclick="dismissConfirm()">Cancel</button>
+      </div>
+    </div>
+
+    <div class="alert" id="mainAlert"></div>
+  </div>
+</main>
+
+<footer>Deerkill Day Camp · Break Tracker</footer>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+//  CONFIGURATION — paste your Apps Script Web App URL here
+// ─────────────────────────────────────────────────────────────
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxQJDBH64GF0lKBduIKboblIYaMLjK7Mx_m_m1pt4ih2raPt5aetQdSpYwOVupcuiM_/exec';
+// ─────────────────────────────────────────────────────────────
+
+// ── Camp periods ──
+const PERIODS = [
+  { name: '1st Period', start: '09:30', end: '10:10' },
+  { name: '2nd Period', start: '10:10', end: '10:50' },
+  { name: '3rd Period', start: '10:50', end: '11:30' },
+  { name: '4th Period', start: '11:30', end: '12:10' },
+  { name: '5th-A',      start: '12:00', end: '12:40' },
+  { name: '5th-B',      start: '12:40', end: '13:25' },
+  { name: '6th Period', start: '13:25', end: '14:10' },
+  { name: '7th Period', start: '14:10', end: '14:55' },
+  { name: '8th Period', start: '14:55', end: '15:50' },
+];
+
+// ── App state ──
+let todayLogs    = [];
+let selectedName = '';
+
+// ════════════════════════════════════════════════════════════
+//  TIME HELPERS
+// ════════════════════════════════════════════════════════════
+function timeToMin(t) {
+  const [h, m] = t.split(':').map(Number);
+  return h * 60 + m;
+}
+
+function getCurrentPeriod() {
+  const now = new Date();
+  const min = now.getHours() * 60 + now.getMinutes();
+  return PERIODS.find(p => min >= timeToMin(p.start) && min < timeToMin(p.end)) || null;
+}
+
+function fmt12(t24) {
+  const [h, m] = t24.split(':').map(Number);
+  return `${h % 12 || 12}:${String(m).padStart(2,'0')} ${h >= 12 ? 'PM' : 'AM'}`;
+}
+
+function formatDate(d) {
+  const y   = d.getFullYear();
+  const m   = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function formatTime(d) {
+  return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+}
+
+// ── Extract first name from "Last, First" format ──
+function getFirstName(fullName) {
+  const parts = fullName.split(',');
+  return parts.length > 1 ? parts[1].trim() : parts[0].trim();
+}
+
+// ════════════════════════════════════════════════════════════
+//  CLOCK — updates every second
+// ════════════════════════════════════════════════════════════
+function updateClock() {
+  const now = new Date();
+
+  document.getElementById('clockTime').textContent = formatTime(now);
+  document.getElementById('headerDate').textContent =
+    now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+  const period = getCurrentPeriod();
+  const wrap   = document.getElementById('clockPeriodWrap');
+  const dot    = document.getElementById('periodDot');
+  const pName  = document.getElementById('currentPeriod');
+  const pTime  = document.getElementById('currentPeriodTime');
+
+  if (period) {
+    wrap.innerHTML = `<span class="period-badge">${period.name}</span>`;
+    dot.style.background = 'var(--accent2)';
+    pName.textContent = period.name;
+    pTime.textContent = `${fmt12(period.start)} – ${fmt12(period.end)}`;
+  } else {
+    wrap.innerHTML = `<span class="period-badge off">Between Periods</span>`;
+    dot.style.background = 'var(--muted)';
+    pName.textContent = 'Between Periods';
+    pTime.textContent = '';
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  DATA LOADING — fetch() calls to Apps Script doGet endpoint
+// ════════════════════════════════════════════════════════════
+async function loadStaff() {
+  try {
+    const res  = await fetch(`${SCRIPT_URL}?action=getStaff`);
+    const data = await res.json();
+
+    const sel = document.getElementById('staffSelect');
+    sel.innerHTML = '<option value="">— Select your name —</option>';
+
+    if (!data.staff || !data.staff.length) {
+      showAlert('mainAlert', 'error', 'No staff names found. Check the Staff tab in the Google Sheet.');
+      return;
+    }
+
+    data.staff.sort().forEach(name => {
+      const o = document.createElement('option');
+      o.value = name; o.textContent = name;
+      sel.appendChild(o);
+    });
+    sel.disabled = false;
+
+    await loadTodayLogs();
+
+  } catch (err) {
+    showAlert('mainAlert', 'error', 'Could not load staff list. Check the Apps Script URL and deployment.');
+    console.error(err);
+  }
+}
+
+async function loadTodayLogs() {
+  try {
+    const today = formatDate(new Date());
+    const res   = await fetch(`${SCRIPT_URL}?action=getTodayLogs&date=${today}`);
+    const data  = await res.json();
+    todayLogs   = data.logs || [];
+  } catch (err) {
+    todayLogs = [];
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  STREAK BANNER
+// ════════════════════════════════════════════════════════════
+async function loadAndShowStreak(name) {
+  try {
+    const res  = await fetch(`${SCRIPT_URL}?action=getStreak&name=${encodeURIComponent(name)}`);
+    const data = await res.json();
+    showStreakBanner(data.streak || 0, data.loggedToday || false, name);
+  } catch (err) {
+    // Fail silently — streak banner is a nice-to-have
+  }
+}
+
+function showStreakBanner(streak, loggedToday, name) {
+  const banner    = document.getElementById('streakBanner');
+  const icon      = document.getElementById('streakIcon');
+  const msg       = document.getElementById('streakMsg');
+  const firstName = getFirstName(name);
+
+  // Reset
+  banner.className = 'streak-banner';
+
+  if (loggedToday && streak >= 2) {
+    // On a streak and already logged today
+    banner.classList.add('fire', 'visible');
+    icon.textContent = '🔥';
+    msg.innerHTML = `<strong>${streak}-day streak, ${firstName}!</strong> You're crushing it — thanks for taking care of yourself every day!`;
+
+  } else if (loggedToday && streak === 1) {
+    // First break ever logged, already done today
+    banner.classList.add('first', 'visible');
+    icon.textContent = '✅';
+    msg.innerHTML = `Great job logging your break today, <strong>${firstName}</strong>! Come back tomorrow to start a streak!`;
+
+  } else if (!loggedToday && streak >= 1) {
+    // Has a streak but hasn't logged today yet — nudge
+    banner.classList.add('nudge', 'visible');
+    icon.textContent = '⏰';
+    msg.innerHTML = `Hey <strong>${firstName}</strong> — you're on a <strong>${streak}-day streak</strong>! Don't forget to log your break today to keep it going!`;
+
+  } else {
+    // No history yet — quiet, no banner
+    banner.classList.remove('visible');
+  }
+}
+
+function hideStreakBanner() {
+  document.getElementById('streakBanner').className = 'streak-banner';
+}
+
+// ════════════════════════════════════════════════════════════
+//  FORM INTERACTIONS
+// ════════════════════════════════════════════════════════════
+function onStaffSelect() {
+  selectedName = document.getElementById('staffSelect').value;
+  dismissConfirm();
+  clearAlert('mainAlert');
+  hideStreakBanner();
+  document.getElementById('checkoutBtn').disabled = !selectedName;
+
+  if (selectedName) loadAndShowStreak(selectedName);
+}
+
+function onCheckoutClick() {
+  if (!selectedName) return;
+
+  const prior = todayLogs.filter(l => l.name === selectedName);
+  if (prior.length > 0) {
+    const last = prior[prior.length - 1];
+    document.getElementById('confirmMsg').textContent =
+      `${selectedName} already logged a break today at ${last.time} (${last.period}). Log another break?`;
+    document.getElementById('confirmBox').classList.add('visible');
+    return;
+  }
+
+  submitBreak(false);
+}
+
+function dismissConfirm() {
+  document.getElementById('confirmBox').classList.remove('visible');
+}
+
+// ════════════════════════════════════════════════════════════
+//  SUBMIT BREAK — POST to Apps Script doPost
+// ════════════════════════════════════════════════════════════
+async function submitBreak(isDuplicate) {
+  dismissConfirm();
+
+  const btn = document.getElementById('checkoutBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Logging…';
+
+  const now    = new Date();
+  const period = getCurrentPeriod();
+
+  const payload = {
+    action:      'logBreak',
+    name:        selectedName,
+    date:        formatDate(now),
+    time:        formatTime(now),
+    period:      period ? period.name : 'Between Periods',
+    isDuplicate: isDuplicate,
+    timestamp:   now.toISOString(),
+  };
+
+  try {
+    const res  = await fetch(SCRIPT_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
+    });
+    const data = await res.json();
+
+    btn.innerHTML = 'Log My Break';
+
+    if (data.status === 'ok') {
+      todayLogs.push(payload);
+      const dupNote = isDuplicate ? ' (2nd break today — flagged in log)' : '';
+      showAlert('mainAlert', 'success',
+        `✓ Break logged for ${selectedName} at ${payload.time}${dupNote}.`);
+      document.getElementById('staffSelect').value = '';
+      selectedName = '';
+      btn.disabled = true;
+      hideStreakBanner();
+    } else {
+      throw new Error(data.message || 'Unknown error');
+    }
+
+  } catch (err) {
+    btn.innerHTML = 'Log My Break';
+    btn.disabled = false;
+    showAlert('mainAlert', 'error', `Failed to log break: ${err.message}`);
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  ALERT HELPERS
+// ════════════════════════════════════════════════════════════
+function showAlert(id, type, msg) {
+  const el = document.getElementById(id);
+  el.className = `alert ${type} visible`;
+  el.textContent = msg;
+}
+
+function clearAlert(id) {
+  const el = document.getElementById(id);
+  el.className = 'alert';
+  el.textContent = '';
+}
+
+// ════════════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════════════
+updateClock();
+setInterval(updateClock, 1000);
+loadStaff();
+</script>
+</body>
+</html>
