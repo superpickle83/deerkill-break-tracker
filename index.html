@@ -45,11 +45,7 @@
     .logo h1    { font-size: 16px; font-weight: 600; }
     .logo small { font-size: 11px; color: var(--muted); display: block; }
 
-    .camp-logo {
-      height: 44px;
-      width: auto;
-      object-fit: contain;
-    }
+    .camp-logo { height: 44px; width: auto; object-fit: contain; }
 
     .clock-display {
       font-family: 'DM Mono', monospace;
@@ -108,9 +104,32 @@
 
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 
-    .period-row .plabel { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
-    .period-row .pvalue { font-size: 15px; font-weight: 600; font-family: 'DM Mono', monospace; }
-    .period-row .ptime  { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+    .period-row .plabel {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 4px;
+    }
+
+    .period-select {
+      width: 100%;
+      padding: 8px 32px 8px 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%237d8590' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+    .period-select:focus { outline: 2px solid var(--accent2); border-color: transparent; }
 
     /* ── STREAK BANNER ── */
     .streak-banner {
@@ -131,30 +150,15 @@
     }
 
     .streak-banner.visible { display: flex; }
-
-    .streak-banner.fire {
-      background: rgba(255, 183, 0, .10);
-      border: 1px solid rgba(255, 183, 0, .35);
-      color: #f5c400;
-    }
-
-    .streak-banner.nudge {
-      background: rgba(88, 166, 255, .10);
-      border: 1px solid rgba(88, 166, 255, .30);
-      color: var(--accent2);
-    }
-
-    .streak-banner.first {
-      background: rgba(63, 185, 80, .10);
-      border: 1px solid rgba(63, 185, 80, .30);
-      color: var(--accent);
-    }
+    .streak-banner.fire  { background: rgba(255,183,0,.10);  border: 1px solid rgba(255,183,0,.35);  color: #f5c400; }
+    .streak-banner.nudge { background: rgba(88,166,255,.10); border: 1px solid rgba(88,166,255,.30); color: var(--accent2); }
+    .streak-banner.first { background: rgba(63,185,80,.10);  border: 1px solid rgba(63,185,80,.30);  color: var(--accent); }
 
     .streak-icon { font-size: 22px; flex-shrink: 0; }
     .streak-msg  { font-size: 13px; line-height: 1.5; }
     .streak-msg strong { font-weight: 700; }
 
-    /* ── FORM ELEMENTS ── */
+    /* ── FORM LABEL ── */
     label {
       display: block;
       font-size: 11px;
@@ -165,27 +169,130 @@
       margin-bottom: 8px;
     }
 
-    select {
+    /* ── NAME SEARCH ── */
+    .search-wrap {
+      position: relative;
+      margin-bottom: 8px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 15px;
+      pointer-events: none;
+    }
+
+    #nameSearch {
       width: 100%;
-      padding: 13px 14px;
+      padding: 13px 14px 13px 38px;
       background: var(--surface2);
       border: 1px solid var(--border);
       border-radius: 8px;
       color: var(--text);
       font-family: 'Sora', sans-serif;
       font-size: 15px;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%237d8590' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 14px center;
-      cursor: pointer;
-      margin-bottom: 20px;
       transition: border-color .15s;
     }
-    select:focus    { outline: 2px solid var(--accent); border-color: transparent; }
-    select:disabled { opacity: .5; cursor: not-allowed; }
+    #nameSearch::placeholder { color: var(--muted); }
+    #nameSearch:focus { outline: 2px solid var(--accent); border-color: transparent; }
+    #nameSearch:disabled { opacity: .5; cursor: not-allowed; }
 
-    /* ── BUTTONS ── */
+    /* ── SEARCH RESULTS ── */
+    .search-results {
+      display: none;
+      flex-direction: column;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+    .search-results.visible { display: flex; }
+
+    .result-item {
+      padding: 12px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border);
+      transition: background .1s;
+    }
+    .result-item:last-child { border-bottom: none; }
+    .result-item:hover { background: var(--border); }
+    .result-item .match { color: var(--accent); font-weight: 700; }
+
+    .no-results {
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .all-done-msg {
+      padding: 13px 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      text-align: center;
+      display: none;
+    }
+
+    /* ── NAME CONFIRMATION ── */
+    .name-confirm {
+      display: none;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
+      animation: fadeSlideIn .25s ease;
+    }
+    .name-confirm.visible { display: block; }
+
+    .nc-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .nc-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 14px;
+    }
+    .nc-name span { color: var(--accent2); }
+
+    .nc-row { display: flex; gap: 10px; }
+
+    .btn-sm {
+      flex: 1;
+      padding: 10px;
+      font-family: 'Sora', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 7px;
+      cursor: pointer;
+      border: none;
+      transition: all .15s;
+    }
+    .btn-yes    { background: var(--accent); color: #0d1117; }
+    .btn-yes:hover { filter: brightness(1.1); }
+    .btn-no     { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
+    .btn-no:hover { color: var(--text); }
+
+    /* ── LOG BUTTON ── */
     .btn {
       width: 100%;
       padding: 14px;
@@ -204,6 +311,23 @@
     .btn:active:not(:disabled){ transform: translateY(0); }
     .btn:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
 
+    /* ── DUPLICATE BOX ── */
+    .dup-box {
+      background: rgba(240,136,62,.08);
+      border: 1px solid rgba(240,136,62,.4);
+      border-radius: 10px;
+      padding: 16px;
+      margin-top: 16px;
+      display: none;
+    }
+    .dup-box.visible { display: block; }
+    .dup-box p { font-size: 13px; color: var(--warn); line-height: 1.6; margin-bottom: 14px; }
+    .dup-row { display: flex; gap: 10px; }
+    .btn-dup-y { flex:1; padding:10px; font-family:'Sora',sans-serif; font-size:13px; font-weight:600; border-radius:7px; cursor:pointer; border:none; background:var(--warn); color:#0d1117; }
+    .btn-dup-y:hover { filter:brightness(1.1); }
+    .btn-dup-n { flex:1; padding:10px; font-family:'Sora',sans-serif; font-size:13px; font-weight:600; border-radius:7px; cursor:pointer; border:1px solid var(--border); background:var(--surface2); color:var(--muted); }
+    .btn-dup-n:hover { color:var(--text); }
+
     /* ── ALERTS ── */
     .alert {
       border-radius: 8px;
@@ -218,36 +342,6 @@
     .alert.error   { background: rgba(248,81,73,.12);  border: 1px solid rgba(248,81,73,.35);  color: var(--danger); }
     .alert.warn    { background: rgba(240,136,62,.12); border: 1px solid rgba(240,136,62,.35); color: var(--warn); }
 
-    /* ── DUPLICATE CONFIRMATION ── */
-    .confirm-box {
-      background: rgba(240,136,62,.08);
-      border: 1px solid rgba(240,136,62,.4);
-      border-radius: 10px;
-      padding: 16px;
-      margin-top: 16px;
-      display: none;
-    }
-    .confirm-box.visible { display: block; }
-    .confirm-box p { font-size: 13px; color: var(--warn); line-height: 1.6; margin-bottom: 14px; }
-
-    .confirm-row { display: flex; gap: 10px; }
-
-    .btn-sm {
-      flex: 1;
-      padding: 10px;
-      font-family: 'Sora', sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      border-radius: 7px;
-      cursor: pointer;
-      border: none;
-      transition: all .15s;
-    }
-    .btn-confirm { background: var(--warn); color: #0d1117; }
-    .btn-confirm:hover { filter: brightness(1.1); }
-    .btn-cancel  { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
-    .btn-cancel:hover { color: var(--text); }
-
     /* ── SPINNER ── */
     .spinner {
       display: inline-block;
@@ -261,7 +355,6 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── FOOTER ── */
     footer {
       text-align: center;
       padding: 24px;
@@ -291,38 +384,70 @@
 <main>
   <div class="card">
     <h2>Take Your Break ☕</h2>
-    <p class="subtitle">Select your name and log your break for today.</p>
+    <p class="subtitle">Search your name and log your break for today.</p>
 
+    <!-- Period selector — auto-selects current period, user can override -->
     <div class="period-row">
       <div class="period-dot" id="periodDot"></div>
-      <div>
-        <div class="plabel">Current Period</div>
-        <div class="pvalue" id="currentPeriod">—</div>
-        <div class="ptime" id="currentPeriodTime"></div>
+      <div style="flex:1">
+        <div class="plabel">Period</div>
+        <select class="period-select" id="periodSelect">
+          <option value="Between Periods">Between Periods</option>
+          <option value="1st Period">1st Period — 9:35–10:05 AM</option>
+          <option value="2nd Period">2nd Period — 10:15–10:45 AM</option>
+          <option value="3rd Period">3rd Period — 10:55–11:25 AM</option>
+          <option value="4th Period">4th Period — 11:35 AM–12:05 PM</option>
+          <option value="5th-A">5th-A — 12:05–12:35 PM</option>
+          <option value="5th-B">5th-B — 12:45–1:15 PM</option>
+          <option value="6th Period">6th Period — 1:30–2:00 PM</option>
+          <option value="7th Period">7th Period — 2:15–2:45 PM</option>
+          <option value="8th Period">8th Period — 3:00–3:45 PM</option>
+        </select>
       </div>
     </div>
 
-    <!-- Streak banner — appears after name selection -->
+    <!-- Streak banner -->
     <div class="streak-banner" id="streakBanner">
       <span class="streak-icon" id="streakIcon"></span>
       <span class="streak-msg"  id="streakMsg"></span>
     </div>
 
-    <label for="staffSelect">Your Name</label>
-    <select id="staffSelect" onchange="onStaffSelect()" disabled>
-      <option value="">Loading staff list…</option>
-    </select>
+    <!-- Name search -->
+    <label for="nameSearch">Your Name</label>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="nameSearch" placeholder="Type first or last name…"
+             oninput="onSearchInput()" autocomplete="off" disabled>
+    </div>
 
-    <button class="btn" id="checkoutBtn" onclick="onCheckoutClick()" disabled>
+    <!-- Live results list -->
+    <div class="search-results" id="searchResults"></div>
+
+    <!-- All done state -->
+    <div class="all-done-msg" id="allDoneMsg">🎉 Everyone has taken their break today!</div>
+
+    <!-- Step 2: Confirm selected name -->
+    <div class="name-confirm" id="nameConfirm">
+      <div class="nc-label">You selected</div>
+      <div class="nc-name" id="ncName"></div>
+      <div class="nc-row">
+        <button class="btn-sm btn-yes" onclick="onNameConfirmed()">✓ That's me</button>
+        <button class="btn-sm btn-no"  onclick="onNameCancelled()">Not me</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Log button — only shown after name confirmed -->
+    <button class="btn" id="checkoutBtn" onclick="onCheckoutClick()"
+            disabled style="display:none">
       Log My Break
     </button>
 
-    <!-- Duplicate acknowledgment warning -->
-    <div class="confirm-box" id="confirmBox">
-      <p id="confirmMsg"></p>
-      <div class="confirm-row">
-        <button class="btn-sm btn-confirm" onclick="submitBreak(true)">Yes, Log Another</button>
-        <button class="btn-sm btn-cancel"  onclick="dismissConfirm()">Cancel</button>
+    <!-- Duplicate warning -->
+    <div class="dup-box" id="dupBox">
+      <p id="dupMsg"></p>
+      <div class="dup-row">
+        <button class="btn-dup-y" onclick="submitBreak(true)">Yes, Log Another</button>
+        <button class="btn-dup-n" onclick="dismissDup()">Cancel</button>
       </div>
     </div>
 
@@ -334,27 +459,28 @@
 
 <script>
 // ─────────────────────────────────────────────────────────────
-//  CONFIGURATION — paste your Apps Script Web App URL here
+//  CONFIGURATION
 // ─────────────────────────────────────────────────────────────
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxQJDBH64GF0lKBduIKboblIYaMLjK7Mx_m_m1pt4ih2raPt5aetQdSpYwOVupcuiM_/exec';
-// ─────────────────────────────────────────────────────────────
 
-// ── Camp periods ──
+// ── Periods for auto-select only ──
 const PERIODS = [
-  { name: '1st Period', start: '09:30', end: '10:10' },
-  { name: '2nd Period', start: '10:10', end: '10:50' },
-  { name: '3rd Period', start: '10:50', end: '11:30' },
-  { name: '4th Period', start: '11:30', end: '12:10' },
-  { name: '5th-A',      start: '12:00', end: '12:40' },
-  { name: '5th-B',      start: '12:40', end: '13:25' },
-  { name: '6th Period', start: '13:25', end: '14:10' },
-  { name: '7th Period', start: '14:10', end: '14:55' },
-  { name: '8th Period', start: '14:55', end: '15:50' },
+  { name: '1st Period', start: '09:35', end: '10:05' },
+  { name: '2nd Period', start: '10:15', end: '10:45' },
+  { name: '3rd Period', start: '10:55', end: '11:25' },
+  { name: '4th Period', start: '11:35', end: '12:05' },
+  { name: '5th-A',      start: '12:05', end: '12:35' },
+  { name: '5th-B',      start: '12:45', end: '13:15' },
+  { name: '6th Period', start: '13:30', end: '14:00' },
+  { name: '7th Period', start: '14:15', end: '14:45' },
+  { name: '8th Period', start: '15:00', end: '15:45' },
 ];
 
 // ── App state ──
-let todayLogs    = [];
-let selectedName = '';
+let todayLogs     = [];
+let fullStaffList = [];
+let selectedName  = '';
+let nameConfirmed = false;
 
 // ════════════════════════════════════════════════════════════
 //  TIME HELPERS
@@ -370,81 +496,72 @@ function getCurrentPeriod() {
   return PERIODS.find(p => min >= timeToMin(p.start) && min < timeToMin(p.end)) || null;
 }
 
-function fmt12(t24) {
-  const [h, m] = t24.split(':').map(Number);
-  return `${h % 12 || 12}:${String(m).padStart(2,'0')} ${h >= 12 ? 'PM' : 'AM'}`;
-}
-
 function formatDate(d) {
-  const y   = d.getFullYear();
-  const m   = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
 function formatTime(d) {
   return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit' });
 }
 
-// ── Extract first name from "Last, First" format ──
 function getFirstName(fullName) {
   const parts = fullName.split(',');
   return parts.length > 1 ? parts[1].trim() : parts[0].trim();
 }
 
 // ════════════════════════════════════════════════════════════
-//  CLOCK — updates every second
+//  CLOCK + PERIOD AUTO-SELECT
 // ════════════════════════════════════════════════════════════
 function updateClock() {
-  const now = new Date();
+  const now    = new Date();
+  const period = getCurrentPeriod();
+  const wrap   = document.getElementById('clockPeriodWrap');
+  const dot    = document.getElementById('periodDot');
 
   document.getElementById('clockTime').textContent = formatTime(now);
   document.getElementById('headerDate').textContent =
     now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
-  const period = getCurrentPeriod();
-  const wrap   = document.getElementById('clockPeriodWrap');
-  const dot    = document.getElementById('periodDot');
-  const pName  = document.getElementById('currentPeriod');
-  const pTime  = document.getElementById('currentPeriodTime');
-
   if (period) {
     wrap.innerHTML = `<span class="period-badge">${period.name}</span>`;
     dot.style.background = 'var(--accent2)';
-    pName.textContent = period.name;
-    pTime.textContent = `${fmt12(period.start)} – ${fmt12(period.end)}`;
   } else {
     wrap.innerHTML = `<span class="period-badge off">Between Periods</span>`;
     dot.style.background = 'var(--muted)';
-    pName.textContent = 'Between Periods';
-    pTime.textContent = '';
   }
 }
 
+function autoSelectPeriod() {
+  const period = getCurrentPeriod();
+  document.getElementById('periodSelect').value = period ? period.name : 'Between Periods';
+}
+
 // ════════════════════════════════════════════════════════════
-//  DATA LOADING — fetch() calls to Apps Script doGet endpoint
+//  DATA LOADING
 // ════════════════════════════════════════════════════════════
 async function loadStaff() {
   try {
     const res  = await fetch(`${SCRIPT_URL}?action=getStaff`);
     const data = await res.json();
 
-    const sel = document.getElementById('staffSelect');
-    sel.innerHTML = '<option value="">— Select your name —</option>';
-
     if (!data.staff || !data.staff.length) {
       showAlert('mainAlert', 'error', 'No staff names found. Check the Staff tab in the Google Sheet.');
       return;
     }
 
-    data.staff.sort().forEach(name => {
-      const o = document.createElement('option');
-      o.value = name; o.textContent = name;
-      sel.appendChild(o);
-    });
-    sel.disabled = false;
-
     await loadTodayLogs();
+    fullStaffList = data.staff;
+
+    const loggedNames = new Set(todayLogs.map(l => l.name));
+    const available   = fullStaffList.filter(n => !loggedNames.has(n));
+
+    if (!available.length) {
+      document.getElementById('allDoneMsg').style.display  = 'block';
+      document.getElementById('nameSearch').style.display  = 'none';
+      document.querySelector('label[for="nameSearch"]').style.display = 'none';
+    } else {
+      document.getElementById('nameSearch').disabled = false;
+    }
 
   } catch (err) {
     showAlert('mainAlert', 'error', 'Could not load staff list. Check the Apps Script URL and deployment.');
@@ -454,13 +571,101 @@ async function loadStaff() {
 
 async function loadTodayLogs() {
   try {
-    const today = formatDate(new Date());
-    const res   = await fetch(`${SCRIPT_URL}?action=getTodayLogs&date=${today}`);
-    const data  = await res.json();
-    todayLogs   = data.logs || [];
+    const res  = await fetch(`${SCRIPT_URL}?action=getTodayLogs&date=${formatDate(new Date())}`);
+    const data = await res.json();
+    todayLogs  = data.logs || [];
   } catch (err) {
     todayLogs = [];
   }
+}
+
+// ════════════════════════════════════════════════════════════
+//  NAME SEARCH
+// ════════════════════════════════════════════════════════════
+function onSearchInput() {
+  const query     = document.getElementById('nameSearch').value.trim().toLowerCase();
+  const resultsEl = document.getElementById('searchResults');
+
+  resetNameSelection();
+
+  if (query.length < 2) {
+    resultsEl.classList.remove('visible');
+    resultsEl.innerHTML = '';
+    return;
+  }
+
+  const loggedNames = new Set(todayLogs.map(l => l.name));
+  const available   = fullStaffList.filter(n => !loggedNames.has(n));
+
+  const matches = available.filter(name => {
+    const parts     = name.split(',');
+    const last      = parts[0].trim().toLowerCase();
+    const first     = parts.length > 1 ? parts[1].trim().toLowerCase() : '';
+    return last.startsWith(query) || first.startsWith(query);
+  });
+
+  resultsEl.innerHTML = '';
+
+  if (!matches.length) {
+    resultsEl.innerHTML = '<div class="no-results">No matches found</div>';
+    resultsEl.classList.add('visible');
+    return;
+  }
+
+  matches.sort().forEach(name => {
+    const item = document.createElement('div');
+    item.className = 'result-item';
+    item.innerHTML = name.replace(new RegExp(`(${query})`, 'gi'), '<span class="match">$1</span>');
+    item.addEventListener('click', () => selectName(name));
+    resultsEl.appendChild(item);
+  });
+
+  resultsEl.classList.add('visible');
+}
+
+function selectName(name) {
+  selectedName  = name;
+  nameConfirmed = false;
+
+  document.getElementById('searchResults').classList.remove('visible');
+  document.getElementById('nameSearch').value = name;
+
+  // Build confirmation display — "FirstName LastName"
+  const parts     = name.split(',');
+  const lastName  = parts[0].trim();
+  const firstName = parts.length > 1 ? parts[1].trim() : '';
+  document.getElementById('ncName').innerHTML =
+    `<span>${firstName}</span>${firstName ? ' ' : ''}${lastName}`;
+  document.getElementById('nameConfirm').classList.add('visible');
+
+  // Keep log button hidden until confirmed
+  document.getElementById('checkoutBtn').style.display = 'none';
+  document.getElementById('checkoutBtn').disabled = true;
+  clearAlert('mainAlert');
+  hideStreakBanner();
+}
+
+function onNameConfirmed() {
+  nameConfirmed = true;
+  document.getElementById('nameConfirm').classList.remove('visible');
+  document.getElementById('checkoutBtn').style.display = 'block';
+  document.getElementById('checkoutBtn').disabled = false;
+  loadAndShowStreak(selectedName);
+}
+
+function onNameCancelled() {
+  resetNameSelection();
+  document.getElementById('nameSearch').value = '';
+  document.getElementById('nameSearch').focus();
+}
+
+function resetNameSelection() {
+  selectedName  = '';
+  nameConfirmed = false;
+  document.getElementById('nameConfirm').classList.remove('visible');
+  document.getElementById('checkoutBtn').style.display = 'none';
+  document.getElementById('checkoutBtn').disabled = true;
+  hideStreakBanner();
 }
 
 // ════════════════════════════════════════════════════════════
@@ -471,9 +676,7 @@ async function loadAndShowStreak(name) {
     const res  = await fetch(`${SCRIPT_URL}?action=getStreak&name=${encodeURIComponent(name)}`);
     const data = await res.json();
     showStreakBanner(data.streak || 0, data.loggedToday || false, name);
-  } catch (err) {
-    // Fail silently — streak banner is a nice-to-have
-  }
+  } catch (err) { /* fail silently */ }
 }
 
 function showStreakBanner(streak, loggedToday, name) {
@@ -482,29 +685,21 @@ function showStreakBanner(streak, loggedToday, name) {
   const msg       = document.getElementById('streakMsg');
   const firstName = getFirstName(name);
 
-  // Reset
   banner.className = 'streak-banner';
 
   if (loggedToday && streak >= 2) {
-    // On a streak and already logged today
     banner.classList.add('fire', 'visible');
     icon.textContent = '🔥';
     msg.innerHTML = `<strong>${streak}-day streak, ${firstName}!</strong> You're crushing it — thanks for taking care of yourself every day!`;
-
   } else if (loggedToday && streak === 1) {
-    // First break ever logged, already done today
     banner.classList.add('first', 'visible');
     icon.textContent = '✅';
     msg.innerHTML = `Great job logging your break today, <strong>${firstName}</strong>! Come back tomorrow to start a streak!`;
-
   } else if (!loggedToday && streak >= 1) {
-    // Has a streak but hasn't logged today yet — nudge
     banner.classList.add('nudge', 'visible');
     icon.textContent = '⏰';
     msg.innerHTML = `Hey <strong>${firstName}</strong> — you're on a <strong>${streak}-day streak</strong>! Don't forget to log your break today to keep it going!`;
-
   } else {
-    // No history yet — quiet, no banner
     banner.classList.remove('visible');
   }
 }
@@ -514,85 +709,85 @@ function hideStreakBanner() {
 }
 
 // ════════════════════════════════════════════════════════════
-//  FORM INTERACTIONS
+//  CHECKOUT FLOW
 // ════════════════════════════════════════════════════════════
-function onStaffSelect() {
-  selectedName = document.getElementById('staffSelect').value;
-  dismissConfirm();
-  clearAlert('mainAlert');
-  hideStreakBanner();
-  document.getElementById('checkoutBtn').disabled = !selectedName;
-
-  if (selectedName) loadAndShowStreak(selectedName);
-}
-
 function onCheckoutClick() {
-  if (!selectedName) return;
+  if (!selectedName || !nameConfirmed) return;
 
   const prior = todayLogs.filter(l => l.name === selectedName);
   if (prior.length > 0) {
     const last = prior[prior.length - 1];
-    document.getElementById('confirmMsg').textContent =
-      `${selectedName} already logged a break today at ${last.time} (${last.period}). Log another break?`;
-    document.getElementById('confirmBox').classList.add('visible');
+    document.getElementById('dupMsg').textContent =
+      `${selectedName} already logged a break today at ${last.time} (${last.period}). Log another?`;
+    document.getElementById('dupBox').classList.add('visible');
     return;
   }
 
   submitBreak(false);
 }
 
-function dismissConfirm() {
-  document.getElementById('confirmBox').classList.remove('visible');
+function dismissDup() {
+  document.getElementById('dupBox').classList.remove('visible');
 }
 
 // ════════════════════════════════════════════════════════════
-//  SUBMIT BREAK — POST to Apps Script doPost
+//  SUBMIT
 // ════════════════════════════════════════════════════════════
 async function submitBreak(isDuplicate) {
-  dismissConfirm();
+  dismissDup();
 
-  const btn = document.getElementById('checkoutBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Logging…';
+  const btn       = document.getElementById('checkoutBtn');
+  btn.disabled    = true;
+  btn.innerHTML   = '<span class="spinner"></span>Logging…';
 
-  const now    = new Date();
-  const period = getCurrentPeriod();
+  const now       = new Date();
+  const periodVal = document.getElementById('periodSelect').value;
 
   const payload = {
     action:      'logBreak',
     name:        selectedName,
     date:        formatDate(now),
     time:        formatTime(now),
-    period:      period ? period.name : 'Between Periods',
+    period:      periodVal,
     isDuplicate: isDuplicate,
     timestamp:   now.toISOString(),
   };
 
   try {
-    const res  = await fetch(SCRIPT_URL, {
-      method:  'POST',
-      body:    JSON.stringify(payload),
-    });
+    const res  = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
     const data = await res.json();
 
     btn.innerHTML = 'Log My Break';
 
     if (data.status === 'ok') {
       todayLogs.push(payload);
-      const dupNote = isDuplicate ? ' (2nd break today — flagged in log)' : '';
+      const dupNote = isDuplicate ? ' (2nd break — flagged in log)' : '';
       showAlert('mainAlert', 'success',
-        `✓ Break logged for ${selectedName} at ${payload.time}${dupNote}.`);
-      document.getElementById('staffSelect').value = '';
-      selectedName = '';
-      btn.disabled = true;
-      hideStreakBanner();
+        `✓ Break logged for ${selectedName} at ${payload.time} — ${periodVal}${dupNote}.`);
+
+      // Check if everyone is done
+      const loggedNames = new Set(todayLogs.map(l => l.name));
+      const remaining   = fullStaffList.filter(n => !loggedNames.has(n));
+
+      if (!remaining.length) {
+        document.getElementById('allDoneMsg').style.display  = 'block';
+        document.getElementById('nameSearch').style.display  = 'none';
+        document.querySelector('label[for="nameSearch"]').style.display = 'none';
+      } else {
+        document.getElementById('nameSearch').value = '';
+        document.getElementById('searchResults').classList.remove('visible');
+      }
+
+      resetNameSelection();
+      autoSelectPeriod();
+
     } else {
       throw new Error(data.message || 'Unknown error');
     }
 
   } catch (err) {
     btn.innerHTML = 'Log My Break';
-    btn.disabled = false;
+    btn.disabled  = false;
     showAlert('mainAlert', 'error', `Failed to log break: ${err.message}`);
   }
 }
@@ -616,6 +811,7 @@ function clearAlert(id) {
 //  INIT
 // ════════════════════════════════════════════════════════════
 updateClock();
+autoSelectPeriod();
 setInterval(updateClock, 1000);
 loadStaff();
 </script>
