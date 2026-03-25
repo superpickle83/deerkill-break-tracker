@@ -392,16 +392,18 @@
       <div style="flex:1">
         <div class="plabel">Period</div>
         <select class="period-select" id="periodSelect">
+          <option value="Before Camp Day">Before Camp Day</option>
           <option value="Between Periods">Between Periods</option>
           <option value="1st Period">1st Period — 9:35–10:05 AM</option>
           <option value="2nd Period">2nd Period — 10:15–10:45 AM</option>
           <option value="3rd Period">3rd Period — 10:55–11:25 AM</option>
-          <option value="4th Period">4th Period — 11:35 AM–12:05 PM</option>
+          <option value="4th Period">4th Period — 11:35 AM–12:00 PM</option>
           <option value="5th-A">5th-A — 12:05–12:35 PM</option>
           <option value="5th-B">5th-B — 12:45–1:15 PM</option>
           <option value="6th Period">6th Period — 1:30–2:00 PM</option>
           <option value="7th Period">7th Period — 2:15–2:45 PM</option>
-          <option value="8th Period">8th Period — 3:00–3:45 PM</option>
+          <option value="8th Period">8th Period — 3:00–3:30 PM</option>
+          <option value="After Camp Day">After Camp Day</option>
         </select>
       </div>
     </div>
@@ -464,16 +466,17 @@
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxQJDBH64GF0lKBduIKboblIYaMLjK7Mx_m_m1pt4ih2raPt5aetQdSpYwOVupcuiM_/exec';
 
 // ── Periods for auto-select only ──
-const PERIODS = [
-  { name: '1st Period', start: '09:35', end: '10:05' },
-  { name: '2nd Period', start: '10:15', end: '10:45' },
-  { name: '3rd Period', start: '10:55', end: '11:25' },
-  { name: '4th Period', start: '11:35', end: '12:05' },
-  { name: '5th-A',      start: '12:05', end: '12:35' },
-  { name: '5th-B',      start: '12:45', end: '13:15' },
-  { name: '6th Period', start: '13:30', end: '14:00' },
-  { name: '7th Period', start: '14:15', end: '14:45' },
-  { name: '8th Period', start: '15:00', end: '15:45' },
+// Each window defines when that period's option should be the default
+const PERIOD_WINDOWS = [
+  { name: '1st Period', start: '09:30', end: '10:10', label: '1st Period — 9:35–10:05 AM' },
+  { name: '2nd Period', start: '10:11', end: '10:50', label: '2nd Period — 10:15–10:45 AM' },
+  { name: '3rd Period', start: '10:51', end: '11:29', label: '3rd Period — 10:55–11:25 AM' },
+  { name: '4th Period', start: '11:30', end: '11:59', label: '4th Period — 11:35 AM–12:00 PM' },
+  { name: '5th-A',      start: '12:01', end: '12:40', label: '5th-A — 12:05–12:35 PM' },
+  { name: '5th-B',      start: '12:41', end: '13:25', label: '5th-B — 12:45–1:15 PM' },
+  { name: '6th Period', start: '13:26', end: '14:10', label: '6th Period — 1:30–2:00 PM' },
+  { name: '7th Period', start: '14:11', end: '14:55', label: '7th Period — 2:15–2:45 PM' },
+  { name: '8th Period', start: '14:56', end: '15:40', label: '8th Period — 3:00–3:30 PM' },
 ];
 
 // ── App state ──
@@ -493,7 +496,15 @@ function timeToMin(t) {
 function getCurrentPeriod() {
   const now = new Date();
   const min = now.getHours() * 60 + now.getMinutes();
-  return PERIODS.find(p => min >= timeToMin(p.start) && min < timeToMin(p.end)) || null;
+  return PERIOD_WINDOWS.find(p => min >= timeToMin(p.start) && min <= timeToMin(p.end)) || null;
+}
+
+function getCampStatus() {
+  const now = new Date();
+  const min = now.getHours() * 60 + now.getMinutes();
+  if (min < timeToMin('09:30')) return 'before';
+  if (min > timeToMin('15:40')) return 'after';
+  return 'during';
 }
 
 function formatDate(d) {
@@ -515,6 +526,7 @@ function getFirstName(fullName) {
 function updateClock() {
   const now    = new Date();
   const period = getCurrentPeriod();
+  const status = getCampStatus();
   const wrap   = document.getElementById('clockPeriodWrap');
   const dot    = document.getElementById('periodDot');
 
@@ -522,7 +534,13 @@ function updateClock() {
   document.getElementById('headerDate').textContent =
     now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
-  if (period) {
+  if (status === 'before') {
+    wrap.innerHTML = `<span class="period-badge off">Before Camp Day</span>`;
+    dot.style.background = 'var(--muted)';
+  } else if (status === 'after') {
+    wrap.innerHTML = `<span class="period-badge off">After Camp Day</span>`;
+    dot.style.background = 'var(--muted)';
+  } else if (period) {
     wrap.innerHTML = `<span class="period-badge">${period.name}</span>`;
     dot.style.background = 'var(--accent2)';
   } else {
@@ -533,7 +551,18 @@ function updateClock() {
 
 function autoSelectPeriod() {
   const period = getCurrentPeriod();
-  document.getElementById('periodSelect').value = period ? period.name : 'Between Periods';
+  const status = getCampStatus();
+  const sel    = document.getElementById('periodSelect');
+
+  if (status === 'before') {
+    sel.value = 'Before Camp Day';
+  } else if (status === 'after') {
+    sel.value = 'After Camp Day';
+  } else if (period) {
+    sel.value = period.name;
+  } else {
+    sel.value = 'Between Periods';
+  }
 }
 
 // ════════════════════════════════════════════════════════════
