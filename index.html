@@ -2,174 +2,259 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>Staff Break Tracker — Deerkill Day Camp</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg:      #0d1117;
-      --surface: #161b22;
-      --surface2:#1e2530;
-      --border:  #2a3441;
-      --accent:  #3fb950;
-      --accent2: #58a6ff;
-      --warn:    #f0883e;
-      --danger:  #f85149;
-      --text:    #e6edf3;
-      --muted:   #7d8590;
+      --bg:        #0b0e14;
+      --surface:   #13161f;
+      --surface2:  #1a1e2a;
+      --surface3:  #20253a;
+      --border:    rgba(255,255,255,0.07);
+      --border-mid:rgba(255,255,255,0.11);
+      --accent:    #3fb950;
+      --accent2:   #58a6ff;
+      --warn:      #f0883e;
+      --danger:    #f85149;
+      --text:      #e8edf8;
+      --muted:     #6b7585;
+      --radius:    20px;
+      --radius-sm: 14px;
+      --radius-xs: 10px;
+      --blur:      blur(20px);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
     body {
       font-family: 'Sora', sans-serif;
       background: var(--bg);
       color: var(--text);
-      min-height: 100vh;
+      min-height: 100dvh;
+      overflow-x: hidden;
     }
 
-    /* ── HEADER ── */
+    /* Ambient glow orbs */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -80px;
+      right: -60px;
+      width: 340px;
+      height: 340px;
+      background: radial-gradient(circle, rgba(63,185,80,0.06) 0%, transparent 65%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: 10%;
+      left: -80px;
+      width: 280px;
+      height: 280px;
+      background: radial-gradient(circle, rgba(88,166,255,0.05) 0%, transparent 65%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── HEADER ───────────────────────────────────────── */
     header {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 16px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
       position: sticky;
       top: 0;
       z-index: 100;
+      padding: 14px 20px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: rgba(11,14,20,0.88);
+      backdrop-filter: var(--blur);
+      border-bottom: 1px solid var(--border);
     }
 
-    .logo { display: flex; align-items: center; gap: 10px; }
-    .logo h1    { font-size: 16px; font-weight: 600; }
-    .logo small { font-size: 11px; color: var(--muted); display: block; }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-    .camp-logo { height: 44px; width: auto; object-fit: contain; }
+    .camp-logo {
+      height: 38px;
+      width: auto;
+      object-fit: contain;
+      border-radius: 8px;
+    }
 
-    .clock-display {
-      font-family: 'DM Mono', monospace;
-      font-size: 13px;
+    .logo-text h1 {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.1;
+    }
+    .logo-text small {
+      font-size: 11px;
       color: var(--muted);
-      text-align: right;
+      display: block;
+      margin-top: 2px;
+      font-weight: 400;
     }
-    .clock-display .time { font-size: 20px; color: var(--text); font-weight: 500; }
+
+    .header-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+
+    .clock-time {
+      font-family: 'DM Mono', monospace;
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
 
     .period-badge {
-      display: inline-block;
-      background: var(--accent2);
-      color: #0d1117;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(88,166,255,0.12);
+      color: var(--accent2);
       font-size: 10px;
       font-weight: 700;
-      padding: 2px 9px;
+      padding: 3px 9px;
       border-radius: 20px;
-      margin-top: 3px;
-      font-family: 'Sora', sans-serif;
-      letter-spacing: .3px;
+      border: 1px solid rgba(88,166,255,0.2);
+      letter-spacing: 0.2px;
     }
-    .period-badge.off { background: var(--border); color: var(--muted); }
+    .period-badge.off {
+      background: rgba(255,255,255,0.04);
+      color: var(--muted);
+      border-color: var(--border);
+    }
+    .period-badge::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+      animation: blink 2s infinite;
+      flex-shrink: 0;
+    }
+    .period-badge.off::before { animation: none; opacity: 0.4; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-    /* ── MAIN ── */
-    main { max-width: 520px; margin: 0 auto; padding: 40px 24px; }
+    /* ── MAIN ─────────────────────────────────────────── */
+    main {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 20px 16px 48px;
+      position: relative;
+      z-index: 1;
+    }
 
+    /* ── CARD ─────────────────────────────────────────── */
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 32px;
+      border-radius: var(--radius);
+      padding: 24px 20px;
+      overflow: hidden;
     }
 
-    .card h2        { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
-    .card .subtitle { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+    .card-header {
+      margin-bottom: 20px;
+    }
+    .card-header h2 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+    .card-header p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
 
-    /* ── PERIOD ROW ── */
+    /* ── PERIOD ROW ───────────────────────────────────── */
     .period-row {
       background: var(--surface2);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 13px 16px;
-      margin-bottom: 24px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      margin-bottom: 18px;
     }
 
-    .period-dot {
-      width: 9px; height: 9px;
-      border-radius: 50%;
-      background: var(--accent2);
-      flex-shrink: 0;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-
-    .period-row .plabel {
-      font-size: 11px;
-      color: var(--muted);
+    .period-row-label {
+      font-size: 10px;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: .5px;
-      margin-bottom: 4px;
+      letter-spacing: 0.7px;
+      color: var(--muted);
+      margin-bottom: 6px;
     }
 
     .period-select {
       width: 100%;
-      padding: 8px 32px 8px 10px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
+      padding: 9px 32px 9px 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border-mid);
+      border-radius: var(--radius-xs);
       color: var(--text);
       font-family: 'DM Mono', monospace;
       font-size: 13px;
       font-weight: 500;
       appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%237d8590' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7585' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
-      background-position: right 10px center;
+      background-position: right 11px center;
       cursor: pointer;
-      margin-top: 4px;
+      transition: border-color 0.15s, background 0.15s;
     }
-    .period-select:focus { outline: 2px solid var(--accent2); border-color: transparent; }
+    .period-select:focus {
+      outline: none;
+      border-color: rgba(88,166,255,0.45);
+      background-color: rgba(88,166,255,0.04);
+    }
 
-    /* ── STREAK BANNER ── */
+    /* ── STREAK BANNER ────────────────────────────────── */
     .streak-banner {
       display: none;
       align-items: center;
       gap: 12px;
-      border-radius: 10px;
+      border-radius: var(--radius-sm);
       padding: 14px 16px;
-      margin-bottom: 20px;
-      font-size: 13px;
-      line-height: 1.5;
-      animation: fadeSlideIn .3s ease;
+      margin-bottom: 18px;
+      animation: slideDown 0.3s cubic-bezier(0.34,1.2,0.64,1);
     }
-
-    @keyframes fadeSlideIn {
-      from { opacity: 0; transform: translateY(-6px); }
-      to   { opacity: 1; transform: translateY(0); }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
     }
-
     .streak-banner.visible { display: flex; }
-    .streak-banner.fire  { background: rgba(255,183,0,.10);  border: 1px solid rgba(255,183,0,.35);  color: #f5c400; }
-    .streak-banner.nudge { background: rgba(88,166,255,.10); border: 1px solid rgba(88,166,255,.30); color: var(--accent2); }
-    .streak-banner.first { background: rgba(63,185,80,.10);  border: 1px solid rgba(63,185,80,.30);  color: var(--accent); }
-
-    .streak-icon { font-size: 22px; flex-shrink: 0; }
-    .streak-msg  { font-size: 13px; line-height: 1.5; }
+    .streak-banner.fire  { background: rgba(255,183,0,0.08);  border: 1px solid rgba(255,183,0,0.25);  color: #f5c400; }
+    .streak-banner.nudge { background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.22); color: var(--accent2); }
+    .streak-banner.first { background: rgba(63,185,80,0.08);  border: 1px solid rgba(63,185,80,0.22);  color: var(--accent); }
+    .streak-icon { font-size: 24px; flex-shrink: 0; }
+    .streak-msg  { font-size: 13px; line-height: 1.55; }
     .streak-msg strong { font-weight: 700; }
 
-    /* ── FORM LABEL ── */
-    label {
-      display: block;
-      font-size: 11px;
+    /* ── FIELD LABEL ──────────────────────────────────── */
+    .field-label {
+      font-size: 10px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: .6px;
+      letter-spacing: 0.7px;
       color: var(--muted);
       margin-bottom: 8px;
+      display: block;
     }
 
-    /* ── NAME SEARCH ── */
+    /* ── NAME SEARCH ──────────────────────────────────── */
     .search-wrap {
       position: relative;
       margin-bottom: 8px;
@@ -177,191 +262,265 @@
 
     .search-icon {
       position: absolute;
-      left: 13px;
+      left: 14px;
       top: 50%;
       transform: translateY(-50%);
       color: var(--muted);
       font-size: 15px;
       pointer-events: none;
+      opacity: 0.7;
     }
 
     #nameSearch {
       width: 100%;
-      padding: 13px 14px 13px 38px;
+      padding: 14px 14px 14px 42px;
       background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
+      border: 1px solid var(--border-mid);
+      border-radius: var(--radius-sm);
       color: var(--text);
       font-family: 'Sora', sans-serif;
       font-size: 15px;
-      transition: border-color .15s;
+      font-weight: 400;
+      transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
     }
-    #nameSearch::placeholder { color: var(--muted); }
-    #nameSearch:focus { outline: 2px solid var(--accent); border-color: transparent; }
-    #nameSearch:disabled { opacity: .5; cursor: not-allowed; }
+    #nameSearch::placeholder { color: var(--muted); opacity: 0.6; }
+    #nameSearch:focus {
+      outline: none;
+      border-color: rgba(63,185,80,0.45);
+      background: rgba(63,185,80,0.03);
+      box-shadow: 0 0 0 3px rgba(63,185,80,0.08);
+    }
+    #nameSearch:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    /* ── SEARCH RESULTS ── */
+    /* ── SEARCH RESULTS ───────────────────────────────── */
     .search-results {
       display: none;
       flex-direction: column;
       background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      margin-bottom: 20px;
+      border: 1px solid var(--border-mid);
+      border-radius: var(--radius-sm);
+      margin-bottom: 16px;
       overflow: hidden;
       max-height: 220px;
       overflow-y: auto;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      animation: slideDown 0.2s ease;
     }
     .search-results.visible { display: flex; }
 
     .result-item {
-      padding: 12px 16px;
+      padding: 13px 16px;
       font-size: 14px;
       cursor: pointer;
       border-bottom: 1px solid var(--border);
-      transition: background .1s;
+      transition: background 0.12s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .result-item::before {
+      content: '→';
+      color: var(--muted);
+      font-size: 12px;
+      opacity: 0;
+      transition: opacity 0.12s;
+      flex-shrink: 0;
     }
     .result-item:last-child { border-bottom: none; }
-    .result-item:hover { background: var(--border); }
+    .result-item:hover { background: rgba(255,255,255,0.04); }
+    .result-item:hover::before { opacity: 1; }
     .result-item .match { color: var(--accent); font-weight: 700; }
 
     .no-results {
-      padding: 12px 16px;
+      padding: 14px 16px;
       font-size: 13px;
       color: var(--muted);
       font-style: italic;
+      text-align: center;
     }
 
     .all-done-msg {
-      padding: 13px 14px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
+      padding: 16px;
+      background: rgba(63,185,80,0.07);
+      border: 1px solid rgba(63,185,80,0.2);
+      border-radius: var(--radius-sm);
       color: var(--accent);
       font-size: 14px;
       font-weight: 600;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       text-align: center;
       display: none;
     }
 
-    /* ── NAME CONFIRMATION ── */
+    /* ── NAME CONFIRM ─────────────────────────────────── */
     .name-confirm {
       display: none;
       background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
+      border: 1px solid var(--border-mid);
+      border-radius: var(--radius-sm);
       padding: 16px;
-      margin-bottom: 20px;
-      animation: fadeSlideIn .25s ease;
+      margin-bottom: 16px;
+      animation: slideDown 0.25s cubic-bezier(0.34,1.2,0.64,1);
     }
     .name-confirm.visible { display: block; }
 
     .nc-label {
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: .6px;
+      letter-spacing: 0.7px;
       color: var(--muted);
       margin-bottom: 6px;
     }
-
     .nc-name {
-      font-size: 20px;
+      font-size: 21px;
       font-weight: 700;
-      color: var(--text);
+      letter-spacing: -0.02em;
       margin-bottom: 14px;
     }
     .nc-name span { color: var(--accent2); }
 
-    .nc-row { display: flex; gap: 10px; }
+    .nc-row { display: flex; gap: 8px; }
 
-    .btn-sm {
+    .btn-confirm {
       flex: 1;
-      padding: 10px;
+      padding: 12px;
       font-family: 'Sora', sans-serif;
       font-size: 13px;
-      font-weight: 600;
-      border-radius: 7px;
+      font-weight: 700;
+      border-radius: var(--radius-xs);
       cursor: pointer;
       border: none;
-      transition: all .15s;
+      transition: all 0.15s;
+      touch-action: manipulation;
+      letter-spacing: 0.1px;
     }
-    .btn-yes    { background: var(--accent); color: #0d1117; }
+    .btn-confirm:active { transform: scale(0.94); }
+    .btn-yes { background: var(--accent); color: #0b0e14; }
     .btn-yes:hover { filter: brightness(1.1); }
-    .btn-no     { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
-    .btn-no:hover { color: var(--text); }
+    .btn-no  { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border-mid); }
+    .btn-no:hover { color: var(--text); background: rgba(255,255,255,0.08); }
 
-    /* ── LOG BUTTON ── */
-    .btn {
+    /* ── LOG BUTTON ───────────────────────────────────── */
+    .btn-log {
       width: 100%;
-      padding: 14px;
+      padding: 15px;
       background: var(--accent);
-      color: #0d1117;
+      color: #0b0e14;
       font-family: 'Sora', sans-serif;
       font-size: 15px;
       font-weight: 700;
       border: none;
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       cursor: pointer;
-      transition: all .2s;
-      letter-spacing: .2px;
+      transition: all 0.2s;
+      letter-spacing: 0.1px;
+      touch-action: manipulation;
+      position: relative;
+      overflow: hidden;
     }
-    .btn:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
-    .btn:active:not(:disabled){ transform: translateY(0); }
-    .btn:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+    .btn-log::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0);
+      transition: background 0.15s;
+    }
+    .btn-log:hover:not(:disabled)::after { background: rgba(255,255,255,0.08); }
+    .btn-log:active:not(:disabled) { transform: scale(0.97); }
+    .btn-log:disabled {
+      background: rgba(255,255,255,0.06);
+      color: var(--muted);
+      cursor: not-allowed;
+    }
 
-    /* ── DUPLICATE BOX ── */
+    /* ── DUPLICATE BOX ────────────────────────────────── */
     .dup-box {
-      background: rgba(240,136,62,.08);
-      border: 1px solid rgba(240,136,62,.4);
-      border-radius: 10px;
+      background: rgba(240,136,62,0.07);
+      border: 1px solid rgba(240,136,62,0.3);
+      border-radius: var(--radius-sm);
       padding: 16px;
-      margin-top: 16px;
+      margin-top: 14px;
       display: none;
+      animation: slideDown 0.2s ease;
     }
     .dup-box.visible { display: block; }
-    .dup-box p { font-size: 13px; color: var(--warn); line-height: 1.6; margin-bottom: 14px; }
-    .dup-row { display: flex; gap: 10px; }
-    .btn-dup-y { flex:1; padding:10px; font-family:'Sora',sans-serif; font-size:13px; font-weight:600; border-radius:7px; cursor:pointer; border:none; background:var(--warn); color:#0d1117; }
-    .btn-dup-y:hover { filter:brightness(1.1); }
-    .btn-dup-n { flex:1; padding:10px; font-family:'Sora',sans-serif; font-size:13px; font-weight:600; border-radius:7px; cursor:pointer; border:1px solid var(--border); background:var(--surface2); color:var(--muted); }
-    .btn-dup-n:hover { color:var(--text); }
+    .dup-box p {
+      font-size: 13px;
+      color: var(--warn);
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+    .dup-row { display: flex; gap: 8px; }
+    .btn-dup {
+      flex: 1;
+      padding: 11px;
+      font-family: 'Sora', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+      touch-action: manipulation;
+    }
+    .btn-dup:active { transform: scale(0.93); }
+    .btn-dup-y { background: var(--warn); color: #0b0e14; }
+    .btn-dup-y:hover { filter: brightness(1.1); }
+    .btn-dup-n { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border-mid); }
+    .btn-dup-n:hover { color: var(--text); }
 
-    /* ── ALERTS ── */
+    /* ── ALERTS ───────────────────────────────────────── */
     .alert {
-      border-radius: 8px;
+      border-radius: var(--radius-xs);
       padding: 13px 15px;
       font-size: 13px;
-      line-height: 1.5;
-      margin-top: 16px;
+      line-height: 1.55;
+      margin-top: 14px;
       display: none;
+      animation: slideDown 0.2s ease;
     }
     .alert.visible { display: block; }
-    .alert.success { background: rgba(63,185,80,.12);  border: 1px solid rgba(63,185,80,.35);  color: #56d364; }
-    .alert.error   { background: rgba(248,81,73,.12);  border: 1px solid rgba(248,81,73,.35);  color: var(--danger); }
-    .alert.warn    { background: rgba(240,136,62,.12); border: 1px solid rgba(240,136,62,.35); color: var(--warn); }
+    .alert.success { background: rgba(63,185,80,0.08);  border: 1px solid rgba(63,185,80,0.25);  color: #56d364; }
+    .alert.error   { background: rgba(248,81,73,0.08);  border: 1px solid rgba(248,81,73,0.25);  color: var(--danger); }
+    .alert.warn    { background: rgba(240,136,62,0.08); border: 1px solid rgba(240,136,62,0.25); color: var(--warn); }
 
-    /* ── SPINNER ── */
+    /* ── DIVIDER ──────────────────────────────────────── */
+    .field-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 18px 0;
+    }
+
+    /* ── SPINNER ──────────────────────────────────────── */
     .spinner {
       display: inline-block;
-      width: 14px; height: 14px;
-      border: 2px solid rgba(255,255,255,.3);
-      border-top-color: #fff;
+      width: 13px;
+      height: 13px;
+      border: 2px solid rgba(0,0,0,0.25);
+      border-top-color: #0b0e14;
       border-radius: 50%;
-      animation: spin .7s linear infinite;
+      animation: spin 0.65s linear infinite;
       vertical-align: middle;
       margin-right: 6px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* ── FOOTER ───────────────────────────────────────── */
     footer {
       text-align: center;
-      padding: 24px;
+      padding: 24px 16px;
       font-size: 11px;
-      color: var(--border);
+      color: rgba(255,255,255,0.12);
       font-family: 'DM Mono', monospace;
+      position: relative;
+      z-index: 1;
     }
+
+    /* ── SCROLLBAR ────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 4px; }
   </style>
 </head>
 <body>
@@ -370,86 +529,82 @@
   <div class="logo">
     <img src="https://typewriter.imgix.net/u/d5ba13b1-8b81-4028-aa6f-21d6150324f1/fi/png/123/logo.png?auto=format,compress"
          alt="Deerkill Day Camp" class="camp-logo">
-    <div>
+    <div class="logo-text">
       <h1>Break Tracker</h1>
       <small id="headerDate"></small>
     </div>
   </div>
-  <div class="clock-display">
-    <div class="time" id="clockTime"></div>
+  <div class="header-right">
+    <div class="clock-time" id="clockTime"></div>
     <div id="clockPeriodWrap"></div>
   </div>
 </header>
 
 <main>
   <div class="card">
-    <h2>Take Your Break ☕</h2>
-    <p class="subtitle">Taking a break? Select the current period, find your name, and tap confirm. Logging a break you forgot to enter? Just adjust the period first.</p>
-
-    <!-- Period selector — auto-selects current period, user can override -->
-    <div class="period-row">
-      <div class="period-dot" id="periodDot"></div>
-      <div style="flex:1">
-        <div class="plabel">Period</div>
-        <select class="period-select" id="periodSelect">
-          <option value="Before Camp Day">Before Camp Day</option>
-          <option value="Between Periods">Between Periods</option>
-          <option value="1st Period">1st Period — 9:35–10:05 AM</option>
-          <option value="2nd Period">2nd Period — 10:15–10:45 AM</option>
-          <option value="3rd Period">3rd Period — 10:55–11:25 AM</option>
-          <option value="4th Period">4th Period — 11:35 AM–12:00 PM</option>
-          <option value="5th-A">5th-A — 12:05–12:35 PM</option>
-          <option value="5th-B">5th-B — 12:45–1:15 PM</option>
-          <option value="6th Period">6th Period — 1:30–2:00 PM</option>
-          <option value="7th Period">7th Period — 2:15–2:45 PM</option>
-          <option value="8th Period">8th Period — 3:00–3:30 PM</option>
-          <option value="After Camp Day">After Camp Day</option>
-        </select>
-      </div>
+    <div class="card-header">
+      <h2>Take Your Break ☕</h2>
+      <p>Select your period, find your name, and tap confirm. Logging a missed break? Just adjust the period first.</p>
     </div>
 
-    <!-- Streak banner -->
+    <!-- Period Selector -->
+    <div class="period-row">
+      <div class="period-row-label">Current Period</div>
+      <select class="period-select" id="periodSelect">
+        <option value="Before Camp Day">Before Camp Day</option>
+        <option value="Between Periods">Between Periods</option>
+        <option value="1st Period">1st Period — 9:35–10:05 AM</option>
+        <option value="2nd Period">2nd Period — 10:15–10:45 AM</option>
+        <option value="3rd Period">3rd Period — 10:55–11:25 AM</option>
+        <option value="4th Period">4th Period — 11:35 AM–12:00 PM</option>
+        <option value="5th-A">5th-A — 12:05–12:35 PM</option>
+        <option value="5th-B">5th-B — 12:45–1:15 PM</option>
+        <option value="6th Period">6th Period — 1:30–2:00 PM</option>
+        <option value="7th Period">7th Period — 2:15–2:45 PM</option>
+        <option value="8th Period">8th Period — 3:00–3:30 PM</option>
+        <option value="After Camp Day">After Camp Day</option>
+      </select>
+    </div>
+
+    <!-- Streak Banner -->
     <div class="streak-banner" id="streakBanner">
       <span class="streak-icon" id="streakIcon"></span>
       <span class="streak-msg"  id="streakMsg"></span>
     </div>
 
-    <!-- Name search -->
-    <label for="nameSearch">Your Name</label>
+    <!-- Name Search -->
+    <label class="field-label" for="nameSearch">Your Name</label>
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
       <input type="text" id="nameSearch" placeholder="Type first or last name…"
              oninput="onSearchInput()" autocomplete="off" disabled>
     </div>
 
-    <!-- Live results list -->
     <div class="search-results" id="searchResults"></div>
-
-    <!-- All done state -->
     <div class="all-done-msg" id="allDoneMsg">🎉 Everyone has taken their break today!</div>
 
-    <!-- Step 2: Confirm selected name -->
+    <!-- Name Confirmation -->
     <div class="name-confirm" id="nameConfirm">
       <div class="nc-label">You selected</div>
       <div class="nc-name" id="ncName"></div>
       <div class="nc-row">
-        <button class="btn-sm btn-yes" onclick="onNameConfirmed()">✓ That's me</button>
-        <button class="btn-sm btn-no"  onclick="onNameCancelled()">Not me</button>
+        <button class="btn-confirm btn-yes" onclick="onNameConfirmed()">✓ That's me</button>
+        <button class="btn-confirm btn-no"  onclick="onNameCancelled()">Not me</button>
       </div>
     </div>
 
-    <!-- Step 3: Log button — only shown after name confirmed -->
-    <button class="btn" id="checkoutBtn" onclick="onCheckoutClick()"
+    <!-- Log Button -->
+    <button class="btn-log" id="checkoutBtn" onclick="onCheckoutClick()"
             disabled style="display:none">
       Log My Break
     </button>
 
-    <!-- Duplicate warning -->
+    <!-- Duplicate Warning -->
     <div class="dup-box" id="dupBox">
       <p id="dupMsg"></p>
       <div class="dup-row">
-        <button class="btn-dup-y" onclick="submitBreak(true)">Yes, Log Another</button>
-        <button class="btn-dup-n" onclick="dismissDup()">Cancel</button>
+        <button class="btn-dup btn-dup-y" onclick="submitBreak(true)">Yes, Log Another</button>
+        <button class="btn-dup btn-dup-n" onclick="dismissDup()">Cancel</button>
       </div>
     </div>
 
@@ -461,22 +616,20 @@
 
 <script>
 // ─────────────────────────────────────────────────────────────
-//  CONFIGURATION
+//  CONFIG
 // ─────────────────────────────────────────────────────────────
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxQJDBH64GF0lKBduIKboblIYaMLjK7Mx_m_m1pt4ih2raPt5aetQdSpYwOVupcuiM_/exec';
 
-// ── Periods for auto-select only ──
-// Each window defines when that period's option should be the default
 const PERIOD_WINDOWS = [
-  { name: '1st Period', start: '09:30', end: '10:10', label: '1st Period — 9:35–10:05 AM' },
-  { name: '2nd Period', start: '10:11', end: '10:50', label: '2nd Period — 10:15–10:45 AM' },
-  { name: '3rd Period', start: '10:51', end: '11:29', label: '3rd Period — 10:55–11:25 AM' },
-  { name: '4th Period', start: '11:30', end: '11:59', label: '4th Period — 11:35 AM–12:00 PM' },
-  { name: '5th-A',      start: '12:01', end: '12:40', label: '5th-A — 12:05–12:35 PM' },
-  { name: '5th-B',      start: '12:41', end: '13:25', label: '5th-B — 12:45–1:15 PM' },
-  { name: '6th Period', start: '13:26', end: '14:10', label: '6th Period — 1:30–2:00 PM' },
-  { name: '7th Period', start: '14:11', end: '14:55', label: '7th Period — 2:15–2:45 PM' },
-  { name: '8th Period', start: '14:56', end: '15:40', label: '8th Period — 3:00–3:30 PM' },
+  { name: '1st Period', start: '09:30', end: '10:10' },
+  { name: '2nd Period', start: '10:11', end: '10:50' },
+  { name: '3rd Period', start: '10:51', end: '11:29' },
+  { name: '4th Period', start: '11:30', end: '11:59' },
+  { name: '5th-A',      start: '12:01', end: '12:40' },
+  { name: '5th-B',      start: '12:41', end: '13:25' },
+  { name: '6th Period', start: '13:26', end: '14:10' },
+  { name: '7th Period', start: '14:11', end: '14:55' },
+  { name: '8th Period', start: '14:56', end: '15:40' },
 ];
 
 // ── App state ──
@@ -485,363 +638,213 @@ let fullStaffList = [];
 let selectedName  = '';
 let nameConfirmed = false;
 
-// ════════════════════════════════════════════════════════════
-//  TIME HELPERS
-// ════════════════════════════════════════════════════════════
-function timeToMin(t) {
-  const [h, m] = t.split(':').map(Number);
-  return h * 60 + m;
-}
-
+// ── TIME HELPERS ──
+function timeToMin(t) { const [h,m]=t.split(':').map(Number); return h*60+m; }
 function getCurrentPeriod() {
-  const now = new Date();
-  const min = now.getHours() * 60 + now.getMinutes();
-  return PERIOD_WINDOWS.find(p => min >= timeToMin(p.start) && min <= timeToMin(p.end)) || null;
+  const now=new Date(), min=now.getHours()*60+now.getMinutes();
+  return PERIOD_WINDOWS.find(p=>min>=timeToMin(p.start)&&min<=timeToMin(p.end))||null;
 }
-
 function getCampStatus() {
-  const now = new Date();
-  const min = now.getHours() * 60 + now.getMinutes();
-  if (min < timeToMin('09:30')) return 'before';
-  if (min > timeToMin('15:40')) return 'after';
+  const now=new Date(), min=now.getHours()*60+now.getMinutes();
+  if(min<timeToMin('09:30')) return 'before';
+  if(min>timeToMin('15:40')) return 'after';
   return 'during';
 }
+function formatDate(d) { return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function formatTime(d) { return d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',second:'2-digit'}); }
+function getFirstName(n) { const p=n.split(','); return p.length>1?p[1].trim():p[0].trim(); }
 
-function formatDate(d) {
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
-
-function formatTime(d) {
-  return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit' });
-}
-
-function getFirstName(fullName) {
-  const parts = fullName.split(',');
-  return parts.length > 1 ? parts[1].trim() : parts[0].trim();
-}
-
-// ════════════════════════════════════════════════════════════
-//  CLOCK + PERIOD AUTO-SELECT
-// ════════════════════════════════════════════════════════════
+// ── CLOCK ──
 function updateClock() {
-  const now    = new Date();
-  const period = getCurrentPeriod();
-  const status = getCampStatus();
-  const wrap   = document.getElementById('clockPeriodWrap');
-  const dot    = document.getElementById('periodDot');
-
-  document.getElementById('clockTime').textContent = formatTime(now);
-  document.getElementById('headerDate').textContent =
-    now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-
-  if (status === 'before') {
-    wrap.innerHTML = `<span class="period-badge off">Before Camp Day</span>`;
-    dot.style.background = 'var(--muted)';
-  } else if (status === 'after') {
-    wrap.innerHTML = `<span class="period-badge off">After Camp Day</span>`;
-    dot.style.background = 'var(--muted)';
-  } else if (period) {
-    wrap.innerHTML = `<span class="period-badge">${period.name}</span>`;
-    dot.style.background = 'var(--accent2)';
-  } else {
-    wrap.innerHTML = `<span class="period-badge off">Between Periods</span>`;
-    dot.style.background = 'var(--muted)';
-  }
+  const now=new Date(), period=getCurrentPeriod(), status=getCampStatus();
+  document.getElementById('clockTime').textContent=formatTime(now);
+  document.getElementById('headerDate').textContent=now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  const wrap=document.getElementById('clockPeriodWrap');
+  if(status==='before')      wrap.innerHTML='<span class="period-badge off">Before Camp Day</span>';
+  else if(status==='after')  wrap.innerHTML='<span class="period-badge off">After Camp Day</span>';
+  else if(period)            wrap.innerHTML=`<span class="period-badge">${period.name}</span>`;
+  else                       wrap.innerHTML='<span class="period-badge off">Between Periods</span>';
 }
 
 function autoSelectPeriod() {
-  const period = getCurrentPeriod();
-  const status = getCampStatus();
-  const sel    = document.getElementById('periodSelect');
-
-  if (status === 'before') {
-    sel.value = 'Before Camp Day';
-  } else if (status === 'after') {
-    sel.value = 'After Camp Day';
-  } else if (period) {
-    sel.value = period.name;
-  } else {
-    sel.value = 'Between Periods';
-  }
+  const period=getCurrentPeriod(), status=getCampStatus(), sel=document.getElementById('periodSelect');
+  if(status==='before')     sel.value='Before Camp Day';
+  else if(status==='after') sel.value='After Camp Day';
+  else if(period)           sel.value=period.name;
+  else                      sel.value='Between Periods';
 }
 
-// ════════════════════════════════════════════════════════════
-//  DATA LOADING
-// ════════════════════════════════════════════════════════════
+// ── DATA LOADING ──
 async function loadStaff() {
   try {
-    const res  = await fetch(`${SCRIPT_URL}?action=getStaff`);
-    const data = await res.json();
-
-    if (!data.staff || !data.staff.length) {
-      showAlert('mainAlert', 'error', 'No staff names found. Check the Staff tab in the Google Sheet.');
-      return;
-    }
-
+    const res=await fetch(`${SCRIPT_URL}?action=getStaff`);
+    const data=await res.json();
+    if(!data.staff||!data.staff.length){ showAlert('mainAlert','error','No staff names found. Check the Staff tab in the Google Sheet.'); return; }
     await loadTodayLogs();
-    fullStaffList = data.staff;
-
-    const loggedNames = new Set(todayLogs.map(l => l.name));
-    const available   = fullStaffList.filter(n => !loggedNames.has(n));
-
-    if (!available.length) {
-      document.getElementById('allDoneMsg').style.display  = 'block';
-      document.getElementById('nameSearch').style.display  = 'none';
-      document.querySelector('label[for="nameSearch"]').style.display = 'none';
+    fullStaffList=data.staff;
+    const loggedNames=new Set(todayLogs.map(l=>l.name));
+    const available=fullStaffList.filter(n=>!loggedNames.has(n));
+    if(!available.length){
+      document.getElementById('allDoneMsg').style.display='block';
+      document.getElementById('nameSearch').style.display='none';
+      document.querySelector('.field-label').style.display='none';
     } else {
-      document.getElementById('nameSearch').disabled = false;
+      document.getElementById('nameSearch').disabled=false;
     }
-
-  } catch (err) {
-    showAlert('mainAlert', 'error', 'Could not load staff list. Check the Apps Script URL and deployment.');
+  } catch(err) {
+    showAlert('mainAlert','error','Could not load staff list. Check the Apps Script URL and deployment.');
     console.error(err);
   }
 }
 
 async function loadTodayLogs() {
   try {
-    const res  = await fetch(`${SCRIPT_URL}?action=getTodayLogs&date=${formatDate(new Date())}`);
-    const data = await res.json();
-    todayLogs  = data.logs || [];
-  } catch (err) {
-    todayLogs = [];
-  }
+    const res=await fetch(`${SCRIPT_URL}?action=getTodayLogs&date=${formatDate(new Date())}`);
+    const data=await res.json();
+    todayLogs=data.logs||[];
+  } catch(err) { todayLogs=[]; }
 }
 
-// ════════════════════════════════════════════════════════════
-//  NAME SEARCH
-// ════════════════════════════════════════════════════════════
+// ── NAME SEARCH ──
 function onSearchInput() {
-  const query     = document.getElementById('nameSearch').value.trim().toLowerCase();
-  const resultsEl = document.getElementById('searchResults');
-
+  const query=document.getElementById('nameSearch').value.trim().toLowerCase();
+  const resultsEl=document.getElementById('searchResults');
   resetNameSelection();
-
-  if (query.length < 2) {
-    resultsEl.classList.remove('visible');
-    resultsEl.innerHTML = '';
-    return;
-  }
-
-  const loggedNames = new Set(todayLogs.map(l => l.name));
-  const available   = fullStaffList.filter(n => !loggedNames.has(n));
-
-  const matches = available.filter(name => {
-    const parts     = name.split(',');
-    const last      = parts[0].trim().toLowerCase();
-    const first     = parts.length > 1 ? parts[1].trim().toLowerCase() : '';
-    return last.startsWith(query) || first.startsWith(query);
+  if(query.length<2){ resultsEl.classList.remove('visible'); resultsEl.innerHTML=''; return; }
+  const loggedNames=new Set(todayLogs.map(l=>l.name));
+  const available=fullStaffList.filter(n=>!loggedNames.has(n));
+  const matches=available.filter(name=>{
+    const parts=name.split(',');
+    const last=parts[0].trim().toLowerCase();
+    const first=parts.length>1?parts[1].trim().toLowerCase():'';
+    return last.startsWith(query)||first.startsWith(query);
   });
-
-  resultsEl.innerHTML = '';
-
-  if (!matches.length) {
-    resultsEl.innerHTML = '<div class="no-results">No matches found</div>';
-    resultsEl.classList.add('visible');
-    return;
-  }
-
-  matches.sort().forEach(name => {
-    const item = document.createElement('div');
-    item.className = 'result-item';
-    item.innerHTML = name.replace(new RegExp(`(${query})`, 'gi'), '<span class="match">$1</span>');
-    item.addEventListener('click', () => selectName(name));
+  resultsEl.innerHTML='';
+  if(!matches.length){ resultsEl.innerHTML='<div class="no-results">No matches found</div>'; resultsEl.classList.add('visible'); return; }
+  matches.sort().forEach(name=>{
+    const item=document.createElement('div');
+    item.className='result-item';
+    item.innerHTML=name.replace(new RegExp(`(${query})`, 'gi'),'<span class="match">$1</span>');
+    item.addEventListener('click',()=>selectName(name));
     resultsEl.appendChild(item);
   });
-
   resultsEl.classList.add('visible');
 }
 
 function selectName(name) {
-  selectedName  = name;
-  nameConfirmed = false;
-
+  selectedName=name; nameConfirmed=false;
   document.getElementById('searchResults').classList.remove('visible');
-  document.getElementById('nameSearch').value = name;
-
-  // Build confirmation display — "FirstName LastName"
-  const parts     = name.split(',');
-  const lastName  = parts[0].trim();
-  const firstName = parts.length > 1 ? parts[1].trim() : '';
-  document.getElementById('ncName').innerHTML =
-    `<span>${firstName}</span>${firstName ? ' ' : ''}${lastName}`;
+  document.getElementById('nameSearch').value=name;
+  const parts=name.split(','), lastName=parts[0].trim(), firstName=parts.length>1?parts[1].trim():'';
+  document.getElementById('ncName').innerHTML=`<span>${firstName}</span>${firstName?' ':''}${lastName}`;
   document.getElementById('nameConfirm').classList.add('visible');
-
-  // Keep log button hidden until confirmed
-  document.getElementById('checkoutBtn').style.display = 'none';
-  document.getElementById('checkoutBtn').disabled = true;
-  clearAlert('mainAlert');
-  hideStreakBanner();
+  document.getElementById('checkoutBtn').style.display='none';
+  document.getElementById('checkoutBtn').disabled=true;
+  clearAlert('mainAlert'); hideStreakBanner();
 }
 
 function onNameConfirmed() {
-  nameConfirmed = true;
+  nameConfirmed=true;
   document.getElementById('nameConfirm').classList.remove('visible');
-  document.getElementById('checkoutBtn').style.display = 'block';
-  document.getElementById('checkoutBtn').disabled = false;
+  document.getElementById('checkoutBtn').style.display='block';
+  document.getElementById('checkoutBtn').disabled=false;
   loadAndShowStreak(selectedName);
 }
 
 function onNameCancelled() {
   resetNameSelection();
-  document.getElementById('nameSearch').value = '';
+  document.getElementById('nameSearch').value='';
   document.getElementById('nameSearch').focus();
 }
 
 function resetNameSelection() {
-  selectedName  = '';
-  nameConfirmed = false;
+  selectedName=''; nameConfirmed=false;
   document.getElementById('nameConfirm').classList.remove('visible');
-  document.getElementById('checkoutBtn').style.display = 'none';
-  document.getElementById('checkoutBtn').disabled = true;
+  document.getElementById('checkoutBtn').style.display='none';
+  document.getElementById('checkoutBtn').disabled=true;
   hideStreakBanner();
 }
 
-// ════════════════════════════════════════════════════════════
-//  STREAK BANNER
-// ════════════════════════════════════════════════════════════
+// ── STREAK ──
 async function loadAndShowStreak(name) {
   try {
-    const res  = await fetch(`${SCRIPT_URL}?action=getStreak&name=${encodeURIComponent(name)}`);
-    const data = await res.json();
-    showStreakBanner(data.streak || 0, data.loggedToday || false, name);
-  } catch (err) { /* fail silently */ }
+    const res=await fetch(`${SCRIPT_URL}?action=getStreak&name=${encodeURIComponent(name)}`);
+    const data=await res.json();
+    showStreakBanner(data.streak||0,data.loggedToday||false,name);
+  } catch(err) {}
 }
 
-function showStreakBanner(streak, loggedToday, name) {
-  const banner    = document.getElementById('streakBanner');
-  const icon      = document.getElementById('streakIcon');
-  const msg       = document.getElementById('streakMsg');
-  const firstName = getFirstName(name);
-
-  banner.className = 'streak-banner';
-
-  if (loggedToday && streak >= 2) {
-    banner.classList.add('fire', 'visible');
-    icon.textContent = '🔥';
-    msg.innerHTML = `<strong>${streak}-day streak, ${firstName}!</strong> You're crushing it — thanks for taking care of yourself every day!`;
-  } else if (loggedToday && streak === 1) {
-    banner.classList.add('first', 'visible');
-    icon.textContent = '✅';
-    msg.innerHTML = `Great job logging your break today, <strong>${firstName}</strong>! Come back tomorrow to start a streak!`;
-  } else if (!loggedToday && streak >= 1) {
-    banner.classList.add('nudge', 'visible');
-    icon.textContent = '⏰';
-    msg.innerHTML = `Hey <strong>${firstName}</strong> — you're on a <strong>${streak}-day streak</strong>! Don't forget to log your break today to keep it going!`;
-  } else {
-    banner.classList.remove('visible');
-  }
+function showStreakBanner(streak,loggedToday,name) {
+  const banner=document.getElementById('streakBanner');
+  const icon=document.getElementById('streakIcon');
+  const msg=document.getElementById('streakMsg');
+  const firstName=getFirstName(name);
+  banner.className='streak-banner';
+  if(loggedToday&&streak>=2){ banner.classList.add('fire','visible'); icon.textContent='🔥'; msg.innerHTML=`<strong>${streak}-day streak, ${firstName}!</strong> You're crushing it — thanks for taking care of yourself every day!`; }
+  else if(loggedToday&&streak===1){ banner.classList.add('first','visible'); icon.textContent='✅'; msg.innerHTML=`Great job logging your break today, <strong>${firstName}</strong>! Come back tomorrow to start a streak!`; }
+  else if(!loggedToday&&streak>=1){ banner.classList.add('nudge','visible'); icon.textContent='⏰'; msg.innerHTML=`Hey <strong>${firstName}</strong> — you're on a <strong>${streak}-day streak</strong>! Don't forget to log your break today to keep it going!`; }
+  else{ banner.classList.remove('visible'); }
 }
 
-function hideStreakBanner() {
-  document.getElementById('streakBanner').className = 'streak-banner';
-}
+function hideStreakBanner() { document.getElementById('streakBanner').className='streak-banner'; }
 
-// ════════════════════════════════════════════════════════════
-//  CHECKOUT FLOW
-// ════════════════════════════════════════════════════════════
+// ── CHECKOUT ──
 function onCheckoutClick() {
-  if (!selectedName || !nameConfirmed) return;
-
-  const prior = todayLogs.filter(l => l.name === selectedName);
-  if (prior.length > 0) {
-    const last = prior[prior.length - 1];
-    document.getElementById('dupMsg').textContent =
-      `${selectedName} already logged a break today at ${last.time} (${last.period}). Log another?`;
+  if(!selectedName||!nameConfirmed) return;
+  const prior=todayLogs.filter(l=>l.name===selectedName);
+  if(prior.length>0){
+    const last=prior[prior.length-1];
+    document.getElementById('dupMsg').textContent=`${selectedName} already logged a break today at ${last.time} (${last.period}). Log another?`;
     document.getElementById('dupBox').classList.add('visible');
     return;
   }
-
   submitBreak(false);
 }
 
-function dismissDup() {
-  document.getElementById('dupBox').classList.remove('visible');
-}
+function dismissDup() { document.getElementById('dupBox').classList.remove('visible'); }
 
-// ════════════════════════════════════════════════════════════
-//  SUBMIT
-// ════════════════════════════════════════════════════════════
 async function submitBreak(isDuplicate) {
   dismissDup();
-
-  const btn       = document.getElementById('checkoutBtn');
-  btn.disabled    = true;
-  btn.innerHTML   = '<span class="spinner"></span>Logging…';
-
-  const now       = new Date();
-  const periodVal = document.getElementById('periodSelect').value;
-
-  const payload = {
-    action:      'logBreak',
-    name:        selectedName,
-    date:        formatDate(now),
-    time:        formatTime(now),
-    period:      periodVal,
-    isDuplicate: isDuplicate,
-    timestamp:   now.toISOString(),
-  };
-
+  const btn=document.getElementById('checkoutBtn');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span>Logging…';
+  const now=new Date(), periodVal=document.getElementById('periodSelect').value;
+  const payload={ action:'logBreak', name:selectedName, date:formatDate(now), time:formatTime(now), period:periodVal, isDuplicate:isDuplicate, timestamp:now.toISOString() };
   try {
-    const res  = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-    const data = await res.json();
-
-    btn.innerHTML = 'Log My Break';
-
-    if (data.status === 'ok') {
+    const res=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify(payload)});
+    const data=await res.json();
+    btn.innerHTML='Log My Break';
+    if(data.status==='ok'){
       todayLogs.push(payload);
-      const dupNote = isDuplicate ? ' (2nd break — flagged in log)' : '';
-      showAlert('mainAlert', 'success',
-        `✓ Break logged for ${selectedName} at ${payload.time} — ${periodVal}${dupNote}.`);
-
-      // Check if everyone is done
-      const loggedNames = new Set(todayLogs.map(l => l.name));
-      const remaining   = fullStaffList.filter(n => !loggedNames.has(n));
-
-      if (!remaining.length) {
-        document.getElementById('allDoneMsg').style.display  = 'block';
-        document.getElementById('nameSearch').style.display  = 'none';
-        document.querySelector('label[for="nameSearch"]').style.display = 'none';
+      const dupNote=isDuplicate?' (2nd break — flagged in log)':'';
+      showAlert('mainAlert','success',`✓ Break logged for ${selectedName} at ${payload.time} — ${periodVal}${dupNote}.`);
+      const loggedNames=new Set(todayLogs.map(l=>l.name));
+      const remaining=fullStaffList.filter(n=>!loggedNames.has(n));
+      if(!remaining.length){
+        document.getElementById('allDoneMsg').style.display='block';
+        document.getElementById('nameSearch').style.display='none';
+        document.querySelector('.field-label').style.display='none';
       } else {
-        document.getElementById('nameSearch').value = '';
+        document.getElementById('nameSearch').value='';
         document.getElementById('searchResults').classList.remove('visible');
       }
-
-      resetNameSelection();
-      autoSelectPeriod();
-
-    } else {
-      throw new Error(data.message || 'Unknown error');
-    }
-
-  } catch (err) {
-    btn.innerHTML = 'Log My Break';
-    btn.disabled  = false;
-    showAlert('mainAlert', 'error', `Failed to log break: ${err.message}`);
+      resetNameSelection(); autoSelectPeriod();
+    } else { throw new Error(data.message||'Unknown error'); }
+  } catch(err) {
+    btn.innerHTML='Log My Break';
+    btn.disabled=false;
+    showAlert('mainAlert','error',`Failed to log break: ${err.message}`);
   }
 }
 
-// ════════════════════════════════════════════════════════════
-//  ALERT HELPERS
-// ════════════════════════════════════════════════════════════
-function showAlert(id, type, msg) {
-  const el = document.getElementById(id);
-  el.className = `alert ${type} visible`;
-  el.textContent = msg;
-}
+// ── ALERTS ──
+function showAlert(id,type,msg){ const el=document.getElementById(id); el.className=`alert ${type} visible`; el.textContent=msg; }
+function clearAlert(id){ const el=document.getElementById(id); el.className='alert'; el.textContent=''; }
 
-function clearAlert(id) {
-  const el = document.getElementById(id);
-  el.className = 'alert';
-  el.textContent = '';
-}
-
-// ════════════════════════════════════════════════════════════
-//  INIT
-// ════════════════════════════════════════════════════════════
+// ── INIT ──
 updateClock();
 autoSelectPeriod();
-setInterval(updateClock, 1000);
+setInterval(updateClock,1000);
 loadStaff();
 </script>
 </body>
