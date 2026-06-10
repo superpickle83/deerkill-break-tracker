@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Staff Break Tracker — Deerkill Day Camp</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
@@ -13,16 +13,49 @@
       --surface3:  #20253a;
       --border:    rgba(255,255,255,0.07);
       --border-mid:rgba(255,255,255,0.11);
+      --input-bg:  rgba(255,255,255,0.04);
+      --hover:     rgba(255,255,255,0.04);
       --accent:    #3fb950;
       --accent2:   #58a6ff;
       --warn:      #f0883e;
       --danger:    #f85149;
       --text:      #e8edf8;
-      --muted:     #6b7585;
+      --muted:     #8b94a6;
+      --on-accent: #0b0e14;
+      --header-bg: rgba(11,14,20,0.88);
+      --footer-text: rgba(255,255,255,0.15);
       --radius:    20px;
       --radius-sm: 14px;
       --radius-xs: 10px;
       --blur:      blur(20px);
+    }
+
+    /* Light theme — better readability in direct sunlight */
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg:        #eef1f6;
+        --surface:   #ffffff;
+        --surface2:  #f4f6fa;
+        --surface3:  #e9edf4;
+        --border:    rgba(15,23,42,0.08);
+        --border-mid:rgba(15,23,42,0.16);
+        --input-bg:  #ffffff;
+        --hover:     rgba(15,23,42,0.05);
+        --accent:    #2da44e;
+        --accent2:   #0969da;
+        --warn:      #bc4c00;
+        --danger:    #d1242f;
+        --text:      #131722;
+        --muted:     #57606f;
+        --on-accent: #ffffff;
+        --header-bg: rgba(255,255,255,0.9);
+        --footer-text: rgba(15,23,42,0.3);
+      }
+      .alert.success { color: #1a7f37 !important; }
+      .streak-banner.fire  { color: #9a6700 !important; }
+      .streak-banner.first { color: #1a7f37 !important; }
+      .result-item .match  { color: #1a7f37; }
+      body::before, body::after { opacity: 0.5; }
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -69,8 +102,9 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      background: rgba(11,14,20,0.88);
+      background: var(--header-bg);
       backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
       border-bottom: 1px solid var(--border);
     }
 
@@ -131,7 +165,7 @@
       letter-spacing: 0.2px;
     }
     .period-badge.off {
-      background: rgba(255,255,255,0.04);
+      background: var(--input-bg);
       color: var(--muted);
       border-color: var(--border);
     }
@@ -201,7 +235,7 @@
     .period-select {
       width: 100%;
       padding: 9px 32px 9px 12px;
-      background: rgba(255,255,255,0.04);
+      background: var(--input-bg);
       border: 1px solid var(--border-mid);
       border-radius: var(--radius-xs);
       color: var(--text);
@@ -218,7 +252,6 @@
     .period-select:focus {
       outline: none;
       border-color: rgba(88,166,255,0.45);
-      background-color: rgba(88,166,255,0.04);
     }
 
     /* ── STREAK BANNER ────────────────────────────────── */
@@ -235,10 +268,14 @@
       from { opacity: 0; transform: translateY(-8px) scale(0.97); }
       to   { opacity: 1; transform: translateY(0) scale(1); }
     }
+    @media (prefers-reduced-motion: reduce) {
+      .streak-banner, .search-results, .name-confirm, .dup-box, .alert { animation: none !important; }
+      .period-badge::before { animation: none !important; }
+    }
     .streak-banner.visible { display: flex; }
     .streak-banner.fire  { background: rgba(255,183,0,0.08);  border: 1px solid rgba(255,183,0,0.25);  color: #f5c400; }
     .streak-banner.nudge { background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.22); color: var(--accent2); }
-    .streak-banner.first { background: rgba(63,185,80,0.08);  border: 1px solid rgba(63,185,80,0.22);  color: var(--accent); }
+    .streak-banner.first { background: rgba(63,185,80,0.08);  border: 1px solid rgba(63,185,80,0.22); color: var(--accent); }
     .streak-icon { font-size: 24px; flex-shrink: 0; }
     .streak-msg  { font-size: 13px; line-height: 1.55; }
     .streak-msg strong { font-weight: 700; }
@@ -279,18 +316,17 @@
       border-radius: var(--radius-sm);
       color: var(--text);
       font-family: 'Sora', sans-serif;
-      font-size: 15px;
+      font-size: 16px; /* 16px+ prevents iOS Safari zoom-on-focus */
       font-weight: 400;
       transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
     }
-    #nameSearch::placeholder { color: var(--muted); opacity: 0.6; }
+    #nameSearch::placeholder { color: var(--muted); opacity: 0.7; }
     #nameSearch:focus {
       outline: none;
       border-color: rgba(63,185,80,0.45);
-      background: rgba(63,185,80,0.03);
       box-shadow: 0 0 0 3px rgba(63,185,80,0.08);
     }
-    #nameSearch:disabled { opacity: 0.4; cursor: not-allowed; }
+    #nameSearch:disabled { opacity: 0.5; cursor: not-allowed; }
 
     /* ── SEARCH RESULTS ───────────────────────────────── */
     .search-results {
@@ -327,9 +363,23 @@
       flex-shrink: 0;
     }
     .result-item:last-child { border-bottom: none; }
-    .result-item:hover { background: rgba(255,255,255,0.04); }
-    .result-item:hover::before { opacity: 1; }
+    .result-item:hover, .result-item:focus-visible { background: var(--hover); }
+    .result-item:focus-visible { outline: 2px solid var(--accent2); outline-offset: -2px; }
+    .result-item:hover::before, .result-item:focus-visible::before { opacity: 1; }
     .result-item .match { color: var(--accent); font-weight: 700; }
+
+    .logged-badge {
+      margin-left: auto;
+      flex-shrink: 0;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      color: var(--accent);
+      background: rgba(63,185,80,0.1);
+      border: 1px solid rgba(63,185,80,0.25);
+      border-radius: 20px;
+      padding: 2px 8px;
+    }
 
     .no-results {
       padding: 14px 16px;
@@ -396,17 +446,17 @@
       letter-spacing: 0.1px;
     }
     .btn-confirm:active { transform: scale(0.94); }
-    .btn-yes { background: var(--accent); color: #0b0e14; }
+    .btn-yes { background: var(--accent); color: var(--on-accent); }
     .btn-yes:hover { filter: brightness(1.1); }
-    .btn-no  { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border-mid); }
-    .btn-no:hover { color: var(--text); background: rgba(255,255,255,0.08); }
+    .btn-no  { background: var(--input-bg); color: var(--muted); border: 1px solid var(--border-mid); }
+    .btn-no:hover { color: var(--text); background: var(--hover); }
 
     /* ── LOG BUTTON ───────────────────────────────────── */
     .btn-log {
       width: 100%;
       padding: 15px;
       background: var(--accent);
-      color: #0b0e14;
+      color: var(--on-accent);
       font-family: 'Sora', sans-serif;
       font-size: 15px;
       font-weight: 700;
@@ -429,7 +479,7 @@
     .btn-log:hover:not(:disabled)::after { background: rgba(255,255,255,0.08); }
     .btn-log:active:not(:disabled) { transform: scale(0.97); }
     .btn-log:disabled {
-      background: rgba(255,255,255,0.06);
+      background: var(--input-bg);
       color: var(--muted);
       cursor: not-allowed;
     }
@@ -465,9 +515,9 @@
       touch-action: manipulation;
     }
     .btn-dup:active { transform: scale(0.93); }
-    .btn-dup-y { background: var(--warn); color: #0b0e14; }
+    .btn-dup-y { background: var(--warn); color: var(--on-accent); }
     .btn-dup-y:hover { filter: brightness(1.1); }
-    .btn-dup-n { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border-mid); }
+    .btn-dup-n { background: var(--input-bg); color: var(--muted); border: 1px solid var(--border-mid); }
     .btn-dup-n:hover { color: var(--text); }
 
     /* ── ALERTS ───────────────────────────────────────── */
@@ -497,8 +547,8 @@
       display: inline-block;
       width: 13px;
       height: 13px;
-      border: 2px solid rgba(0,0,0,0.25);
-      border-top-color: #0b0e14;
+      border: 2px solid rgba(0,0,0,0.2);
+      border-top-color: currentColor;
       border-radius: 50%;
       animation: spin 0.65s linear infinite;
       vertical-align: middle;
@@ -511,7 +561,7 @@
       text-align: center;
       padding: 24px 16px;
       font-size: 11px;
-      color: rgba(255,255,255,0.12);
+      color: var(--footer-text);
       font-family: 'DM Mono', monospace;
       position: relative;
       z-index: 1;
@@ -550,7 +600,7 @@
     <!-- Period Selector -->
     <div class="period-row">
       <div class="period-row-label">Current Period</div>
-      <select class="period-select" id="periodSelect">
+      <select class="period-select" id="periodSelect" aria-label="Break period">
         <option value="Before Camp Day">Before Camp Day</option>
         <option value="Between Periods">Between Periods</option>
         <option value="1st Period">1st Period — 9:35–10:05 AM</option>
@@ -567,21 +617,22 @@
     </div>
 
     <!-- Streak Banner -->
-    <div class="streak-banner" id="streakBanner">
-      <span class="streak-icon" id="streakIcon"></span>
+    <div class="streak-banner" id="streakBanner" role="status" aria-live="polite">
+      <span class="streak-icon" id="streakIcon" aria-hidden="true"></span>
       <span class="streak-msg"  id="streakMsg"></span>
     </div>
 
     <!-- Name Search -->
     <label class="field-label" for="nameSearch">Your Name</label>
     <div class="search-wrap">
-      <span class="search-icon">🔍</span>
-      <input type="text" id="nameSearch" placeholder="Type first or last name…"
-             oninput="onSearchInput()" autocomplete="off" disabled>
+      <span class="search-icon" aria-hidden="true">🔍</span>
+      <input type="text" id="nameSearch" placeholder="Loading staff list…"
+             oninput="onSearchInput()" autocomplete="off" disabled
+             role="combobox" aria-expanded="false" aria-controls="searchResults">
     </div>
 
-    <div class="search-results" id="searchResults"></div>
-    <div class="all-done-msg" id="allDoneMsg">🎉 Everyone has taken their break today!</div>
+    <div class="search-results" id="searchResults" role="listbox" aria-label="Matching staff names"></div>
+    <div class="all-done-msg" id="allDoneMsg" role="status">🎉 Everyone has logged a break today! Need a second break? Search your name above.</div>
 
     <!-- Name Confirmation -->
     <div class="name-confirm" id="nameConfirm">
@@ -600,7 +651,7 @@
     </button>
 
     <!-- Duplicate Warning -->
-    <div class="dup-box" id="dupBox">
+    <div class="dup-box" id="dupBox" role="alertdialog" aria-labelledby="dupMsg">
       <p id="dupMsg"></p>
       <div class="dup-row">
         <button class="btn-dup btn-dup-y" onclick="submitBreak(true)">Yes, Log Another</button>
@@ -608,7 +659,7 @@
       </div>
     </div>
 
-    <div class="alert" id="mainAlert"></div>
+    <div class="alert" id="mainAlert" role="status" aria-live="polite"></div>
   </div>
 </main>
 
@@ -633,10 +684,12 @@ const PERIOD_WINDOWS = [
 ];
 
 // ── App state ──
-let todayLogs     = [];
-let fullStaffList = [];
-let selectedName  = '';
-let nameConfirmed = false;
+let todayLogs         = [];
+let fullStaffList     = [];
+let selectedName      = '';
+let nameConfirmed     = false;
+let periodManuallySet = false;   // true once the user touches the dropdown — stops auto-sync from fighting them
+let alertTimer        = null;
 
 // ── TIME HELPERS ──
 function timeToMin(t) { const [h,m]=t.split(':').map(Number); return h*60+m; }
@@ -653,6 +706,7 @@ function getCampStatus() {
 function formatDate(d) { return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function formatTime(d) { return d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',second:'2-digit'}); }
 function getFirstName(n) { const p=n.split(','); return p.length>1?p[1].trim():p[0].trim(); }
+function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
 
 // ── CLOCK ──
 function updateClock() {
@@ -674,6 +728,12 @@ function autoSelectPeriod() {
   else                      sel.value='Between Periods';
 }
 
+// Keep the dropdown synced with the real clock for pages left open,
+// unless the user has manually picked a period (e.g. logging a missed break).
+function syncPeriodIfAuto() {
+  if(!periodManuallySet) autoSelectPeriod();
+}
+
 // ── DATA LOADING ──
 async function loadStaff() {
   try {
@@ -682,15 +742,10 @@ async function loadStaff() {
     if(!data.staff||!data.staff.length){ showAlert('mainAlert','error','No staff names found. Check the Staff tab in the Google Sheet.'); return; }
     await loadTodayLogs();
     fullStaffList=data.staff;
-    const loggedNames=new Set(todayLogs.map(l=>l.name));
-    const available=fullStaffList.filter(n=>!loggedNames.has(n));
-    if(!available.length){
-      document.getElementById('allDoneMsg').style.display='block';
-      document.getElementById('nameSearch').style.display='none';
-      document.querySelector('.field-label').style.display='none';
-    } else {
-      document.getElementById('nameSearch').disabled=false;
-    }
+    updateAllDoneMsg();
+    const input=document.getElementById('nameSearch');
+    input.disabled=false;
+    input.placeholder='Type first or last name…';
   } catch(err) {
     showAlert('mainAlert','error','Could not load staff list. Check the Apps Script URL and deployment.');
     console.error(err);
@@ -705,35 +760,68 @@ async function loadTodayLogs() {
   } catch(err) { todayLogs=[]; }
 }
 
+function updateAllDoneMsg() {
+  const loggedNames=new Set(todayLogs.map(l=>l.name));
+  const remaining=fullStaffList.filter(n=>!loggedNames.has(n));
+  document.getElementById('allDoneMsg').style.display = remaining.length ? 'none' : 'block';
+}
+
 // ── NAME SEARCH ──
 function onSearchInput() {
-  const query=document.getElementById('nameSearch').value.trim().toLowerCase();
+  const input=document.getElementById('nameSearch');
+  const query=input.value.trim().toLowerCase();
   const resultsEl=document.getElementById('searchResults');
   resetNameSelection();
-  if(query.length<2){ resultsEl.classList.remove('visible'); resultsEl.innerHTML=''; return; }
+  if(query.length<2){ hideResults(); return; }
   const loggedNames=new Set(todayLogs.map(l=>l.name));
-  const available=fullStaffList.filter(n=>!loggedNames.has(n));
-  const matches=available.filter(name=>{
+  // Logged staff stay searchable so the duplicate-break flow can run.
+  const matches=fullStaffList.filter(name=>{
     const parts=name.split(',');
     const last=parts[0].trim().toLowerCase();
     const first=parts.length>1?parts[1].trim().toLowerCase():'';
     return last.startsWith(query)||first.startsWith(query);
   });
   resultsEl.innerHTML='';
-  if(!matches.length){ resultsEl.innerHTML='<div class="no-results">No matches found</div>'; resultsEl.classList.add('visible'); return; }
+  if(!matches.length){
+    resultsEl.innerHTML='<div class="no-results">No matches found</div>';
+    resultsEl.classList.add('visible');
+    input.setAttribute('aria-expanded','true');
+    return;
+  }
+  const safeQuery=escapeRegex(query);
   matches.sort().forEach(name=>{
     const item=document.createElement('div');
     item.className='result-item';
-    item.innerHTML=name.replace(new RegExp(`(${query})`, 'gi'),'<span class="match">$1</span>');
+    item.setAttribute('role','option');
+    item.tabIndex=0;
+    let html=name.replace(new RegExp(`(${safeQuery})`,'gi'),'<span class="match">$1</span>');
+    if(loggedNames.has(name)) html+='<span class="logged-badge">✓ logged</span>';
+    item.innerHTML=html;
     item.addEventListener('click',()=>selectName(name));
+    item.addEventListener('keydown',e=>{
+      if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectName(name); }
+    });
     resultsEl.appendChild(item);
   });
   resultsEl.classList.add('visible');
+  input.setAttribute('aria-expanded','true');
 }
+
+function hideResults() {
+  const resultsEl=document.getElementById('searchResults');
+  resultsEl.classList.remove('visible');
+  resultsEl.innerHTML='';
+  document.getElementById('nameSearch').setAttribute('aria-expanded','false');
+}
+
+// Close the results dropdown when tapping anywhere outside it
+document.addEventListener('click', e=>{
+  if(!e.target.closest('.search-wrap') && !e.target.closest('.search-results')) hideResults();
+});
 
 function selectName(name) {
   selectedName=name; nameConfirmed=false;
-  document.getElementById('searchResults').classList.remove('visible');
+  hideResults();
   document.getElementById('nameSearch').value=name;
   const parts=name.split(','), lastName=parts[0].trim(), firstName=parts.length>1?parts[1].trim():'';
   document.getElementById('ncName').innerHTML=`<span>${firstName}</span>${firstName?' ':''}${lastName}`;
@@ -789,8 +877,20 @@ function showStreakBanner(streak,loggedToday,name) {
 function hideStreakBanner() { document.getElementById('streakBanner').className='streak-banner'; }
 
 // ── CHECKOUT ──
-function onCheckoutClick() {
+async function onCheckoutClick() {
   if(!selectedName||!nameConfirmed) return;
+  const btn=document.getElementById('checkoutBtn');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span>Checking…';
+
+  // Re-fetch today's logs so duplicate detection reflects other devices,
+  // not just what this page saw at load time.
+  await loadTodayLogs();
+  updateAllDoneMsg();
+
+  btn.innerHTML='Log My Break';
+  btn.disabled=false;
+
   const prior=todayLogs.filter(l=>l.name===selectedName);
   if(prior.length>0){
     const last=prior[prior.length-1];
@@ -809,7 +909,9 @@ async function submitBreak(isDuplicate) {
   btn.disabled=true;
   btn.innerHTML='<span class="spinner"></span>Logging…';
   const now=new Date(), periodVal=document.getElementById('periodSelect').value;
-  const payload={ action:'logBreak', name:selectedName, date:formatDate(now), time:formatTime(now), period:periodVal, isDuplicate:isDuplicate, timestamp:now.toISOString() };
+  // Note: date/time here are client-side and display-only. The Apps Script
+  // should stamp its own server time as the authoritative record.
+  const payload={ action:'logBreak', name:selectedName, date:formatDate(now), time:formatTime(now), period:periodVal, isDuplicate:isDuplicate, timestamp:now.toISOString(), tzOffsetMin:now.getTimezoneOffset() };
   try {
     const res=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify(payload)});
     const data=await res.json();
@@ -817,18 +919,13 @@ async function submitBreak(isDuplicate) {
     if(data.status==='ok'){
       todayLogs.push(payload);
       const dupNote=isDuplicate?' (2nd break — flagged in log)':'';
-      showAlert('mainAlert','success',`✓ Break logged for ${selectedName} at ${payload.time} — ${periodVal}${dupNote}.`);
-      const loggedNames=new Set(todayLogs.map(l=>l.name));
-      const remaining=fullStaffList.filter(n=>!loggedNames.has(n));
-      if(!remaining.length){
-        document.getElementById('allDoneMsg').style.display='block';
-        document.getElementById('nameSearch').style.display='none';
-        document.querySelector('.field-label').style.display='none';
-      } else {
-        document.getElementById('nameSearch').value='';
-        document.getElementById('searchResults').classList.remove('visible');
-      }
-      resetNameSelection(); autoSelectPeriod();
+      showAlert('mainAlert','success',`✓ Break logged for ${selectedName} at ${payload.time} — ${periodVal}${dupNote}.`,6000);
+      updateAllDoneMsg();
+      document.getElementById('nameSearch').value='';
+      hideResults();
+      resetNameSelection();
+      periodManuallySet=false;   // resume auto-sync for the next person
+      autoSelectPeriod();
     } else { throw new Error(data.message||'Unknown error'); }
   } catch(err) {
     btn.innerHTML='Log My Break';
@@ -838,13 +935,20 @@ async function submitBreak(isDuplicate) {
 }
 
 // ── ALERTS ──
-function showAlert(id,type,msg){ const el=document.getElementById(id); el.className=`alert ${type} visible`; el.textContent=msg; }
+function showAlert(id,type,msg,autoClearMs){
+  const el=document.getElementById(id);
+  el.className=`alert ${type} visible`;
+  el.textContent=msg;
+  if(alertTimer){ clearTimeout(alertTimer); alertTimer=null; }
+  if(autoClearMs) alertTimer=setTimeout(()=>clearAlert(id),autoClearMs);
+}
 function clearAlert(id){ const el=document.getElementById(id); el.className='alert'; el.textContent=''; }
 
 // ── INIT ──
+document.getElementById('periodSelect').addEventListener('change',()=>{ periodManuallySet=true; });
 updateClock();
 autoSelectPeriod();
-setInterval(updateClock,1000);
+setInterval(()=>{ updateClock(); syncPeriodIfAuto(); },1000);
 loadStaff();
 </script>
 </body>
